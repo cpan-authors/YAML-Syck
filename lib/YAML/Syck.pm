@@ -3,7 +3,7 @@ package YAML::Syck;
 
 use strict;
 use vars qw(
-    @ISA @EXPORT $VERSION
+    @ISA @EXPORT @EXPORT_OK $VERSION
     $Headless $SortKeys $SingleQuote
     $ImplicitBinary $ImplicitTyping $ImplicitUnicode 
     $UseCode $LoadCode $DumpCode
@@ -13,9 +13,10 @@ use 5.006;
 use Exporter;
 
 BEGIN {
-    $VERSION = '1.20';
-    @EXPORT  = qw( Dump Load DumpFile LoadFile );
-    @ISA     = qw( Exporter );
+    $VERSION   = '1.21_01';
+    @EXPORT    = qw( Dump Load DumpFile LoadFile );
+    @EXPORT_OK = qw( DumpInto );
+    @ISA       = qw( Exporter );
 
     $SortKeys = 1;
     $LoadBlessed = 1;
@@ -91,23 +92,26 @@ sub _is_glob {
 sub DumpFile {
     my $file = shift;
     if ( _is_glob($file) ) {
-        if ($#_) {
-            print {$file} YAML::Syck::DumpYAML($_) for @_;
+        for (@_) {
+            my $err = YAML::Syck::DumpYAMLFile($_, $file);
+            if ($err) {
+                $! = 0+$err;
+                die "Error writing to filehandle $file: $!\n";
+            }
         }
-        else {
-            print {$file} YAML::Syck::DumpYAML($_[0]);
-        }
-    }
-    else {
+    } else {
         open(my $fh, '>', $file) or die "Cannot write to $file: $!";
-        if ($#_) {
-            print {$fh} YAML::Syck::DumpYAML($_) for @_;
+        for (@_) {
+            my $err = YAML::Syck::DumpYAMLFile($_, $fh);
+            if ($err) {
+                $! = 0+$err;
+                die "Error writing to file $file: $!\n";
+            }
         }
-        else {
-            print {$fh} YAML::Syck::DumpYAML($_[0]);
-        }
-        close $fh;
+        close $fh
+            or die "Error writing to file $file: $!\n";
     }
+    return 1;
 }
 
 sub LoadFile {
@@ -122,6 +126,13 @@ sub LoadFile {
         open(my $fh, '<', $file) or die "Cannot read from $file: $!";
         Load(do { local $/; <$fh> });
     }
+}
+
+sub DumpInto {
+    my $bufref = shift;
+    (ref $bufref) or die "DumpInto not given reference to output buffer\n";
+    YAML::Syck::DumpYAMLInto($_, $bufref) for @_;
+    1;
 }
 
 1;
@@ -151,6 +162,10 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
     # A string with multiple YAML streams in it
     $yaml = Dump(@data);
     @data = Load($yaml);
+
+    # Dumping into a pre-existing output buffer
+    my $yaml;
+    DumpInto(\$yaml, @data);
 
 =head1 DESCRIPTION
 
@@ -236,6 +251,9 @@ blessing tag names that do not begin with C<!!perl> or C<!perl>; see below.
 Dumping Glob/IO values do not work yet.
 
 Dumping of Tied variables is unsupported.
+
+Dumping into tied (or other magic variables) with C<DumpInto> might not work
+properly in all cases.
 
 =head1 CAVEATS
 

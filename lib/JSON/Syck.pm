@@ -5,8 +5,8 @@ use Exporter;
 use YAML::Syck ();
 
 BEGIN {
-    $VERSION    = '0.43';
-    @EXPORT_OK  = qw( Load Dump LoadFile DumpFile );
+    $VERSION    = '1.21_01';
+    @EXPORT_OK  = qw( Load Dump LoadFile DumpFile DumpInto );
     @ISA        = 'Exporter';
     *Load       = \&YAML::Syck::LoadJSON;
     *Dump       = \&YAML::Syck::DumpJSON;
@@ -15,13 +15,22 @@ BEGIN {
 sub DumpFile {
     my $file = shift;
     if ( YAML::Syck::_is_glob($file) ) {
-        print {$file} YAML::Syck::DumpJSON($_[0]);
-    }
-    else {
+        my $err = YAML::Syck::DumpJSONFile($_[0], $file);
+        if ($err) {
+            $! = 0+$err;
+            die "Error writing to filehandle $file: $!\n";
+        }
+    } else {
         open(my $fh, '>',  $file) or die "Cannot write to $file: $!";
-        print {$fh} YAML::Syck::DumpJSON($_[0]);
-        close $fh;
+        my $err = YAML::Syck::DumpJSONFile($_[0], $fh);
+        if ($err) {
+            $! = 0+$err;
+            die "Error writing to file $file: $!\n";
+        }
+        close $fh
+            or die "Error writing to file $file: $!\n";
     }
+    return 1;
 }
 
 
@@ -37,6 +46,13 @@ sub LoadFile {
         open(my $fh, '<', $file) or die "Cannot read from $file: $!";
         YAML::Syck::LoadJSON(do { local $/; <$fh> });
     }
+}
+
+sub DumpInto {
+    my $bufref = shift;
+    (ref $bufref) or die "DumpInto not given reference to output buffer\n";
+    YAML::Syck::DumpJSONInto($_[0], $bufref);
+    1;
 }
 
 $JSON::Syck::ImplicitTyping  = 1;
@@ -62,6 +78,10 @@ JSON::Syck - JSON is YAML (but consider using L<JSON::XS> instead!)
     # $file can be an IO object, or a filename
     my $data = JSON::Syck::LoadFile($file);
     JSON::Syck::DumpFile($file, $data);
+
+    # Dump into a pre-existing buffer
+    my $json;
+    JSON::Syck::DumpInto(\$json, $data);
 
 =head1 DESCRIPTION
 
@@ -144,9 +164,17 @@ convenient to use single quotes.
 Set C<$JSON::Syck::SingleQuote> to 1 will make both C<Dump> and C<Load> expect
 single-quoted string literals.
 
+=head1 BUGS
+
+Dumping into tied (or other magic variables) with C<DumpInto> might not work
+properly in all cases.
+
+When dumping with C<DumpFile>, some spacing might be wrong and
+C<$JSON::Syck::SingleQuote> might be handled incorrectly.
+
 =head1 SEE ALSO
 
-L<JSON::XS>,
+L<JSON::XS>, L<YAML::Syck>
 
 =head1 AUTHORS
 

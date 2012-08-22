@@ -1,8 +1,18 @@
-[Changes for 1.20] (JSON::Syck 0.43) - 2012-02-14]
+[Changes for 1.21_01 - 2012-06-22]
+
+* Synchronize JSON::Syck with YAML::Syck version number
+* Add DumpInto functions (YAML+Syck) which dump into
+  a provided scalar instead of a newly allocated one
+* Modify DumpFile functions to output directly to the
+  specified file/filehandle instead of buffering all
+  output in memory.
+* Avoid modifying numbers into strings when emitting
+
+[Changes for 1.20 (JSON::Syck 0.43) - 2012-02-14]
 
 * Tests all green on CPAN Testers. releasing to public.
 
-[Changes for 1.20_01] (JSON::Syck 0.43_01) - 2012-02-11]
+[Changes for 1.20_01 (JSON::Syck 0.43_01) - 2012-02-11]
 
 * Add test to assure META.yml is up to date before release
 * Fix for RT 70933 - disable check for empty file handle in LoadFile calls

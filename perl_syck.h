@@ -978,7 +978,7 @@ yaml_syck_emitter_handler
         /* emit an undef (typically pointed from a blesed SvRV) */
         syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
-    else if (SvPOKp(sv)) {
+    else if (SvPOK(sv)) {
         /* emit a string */
         STRLEN len = sv_len(sv);
 
@@ -1033,11 +1033,19 @@ yaml_syck_emitter_handler
         }
     }
     else if (SvNIOK(sv)) {
-    	if(SvIOK(sv) && syck_str_is_unquotable_integer(SvPV_nolen(sv), sv_len(sv)) ) { /* int detection. */
-    		syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
-        } else { /* We need to quote this thing even though it appears a number. Only small integers round trip correctly & portably. */
-    		syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+    	/* Stringify the sv, being careful not to overwrite its PV part */
+    	SV *sv2 = newSVsv(sv);
+    	STRLEN len;
+    	char *str = SvPV(sv2, len);
+    	if (SvIOK(sv) /* original SV was an int */
+    	    && syck_str_is_unquotable_integer(str, len)) /* small enough to safely round-trip */
+    	{
+    		syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, str, len);
+        } else {
+    		/* We need to quote it */
+    		syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, str, len);
         }
+        SvREFCNT_dec(sv2);
     }
     else {
         switch (ty) {
@@ -1204,18 +1212,15 @@ yaml_syck_emitter_handler
     *tag = '\0';
 }
 
-SV*
+void
 #ifdef YAML_IS_JSON
-DumpJSON
+DumpJSONImpl
 #else
-DumpYAML
+DumpYAMLImpl
 #endif
-(SV *sv) {
-    struct emitter_xtra bonus;
+(SV *sv, struct emitter_xtra *bonus, SyckOutputHandler output_handler) {
     SyckEmitter *emitter = syck_new_emitter();
-    SV* out              = newSVpvn("", 0);
     SV *headless         = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
-    SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *implicit_binary  = GvSV(gv_fetchpv(form("%s::ImplicitBinary", PACKAGE_NAME), TRUE, SVt_PV));
     SV *use_code         = GvSV(gv_fetchpv(form("%s::UseCode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *dump_code        = GvSV(gv_fetchpv(form("%s::DumpCode", PACKAGE_NAME), TRUE, SVt_PV));
@@ -1249,15 +1254,14 @@ DumpYAML
     emitter->sort_keys = SvTRUE(sortkeys);
     emitter->anchor_format = "%d";
 
-    bonus.port = out;
-    New(801, bonus.tag, 512, char);
-    *(bonus.tag) = '\0';
-    bonus.dump_code = SvTRUE(use_code) || SvTRUE(dump_code);
-    bonus.implicit_binary = SvTRUE(implicit_binary);
-    emitter->bonus = &bonus;
+    New(801, bonus->tag, 512, char);
+    *(bonus->tag) = '\0';
+    bonus->dump_code = SvTRUE(use_code) || SvTRUE(dump_code);
+    bonus->implicit_binary = SvTRUE(implicit_binary);
+    emitter->bonus = bonus;
 
     syck_emitter_handler( emitter, PERL_SYCK_EMITTER_HANDLER );
-    syck_output_handler( emitter, perl_syck_output_handler );
+    syck_output_handler( emitter, output_handler );
 
     PERL_SYCK_MARK_EMITTER( emitter, sv );
 
@@ -1270,22 +1274,91 @@ DumpYAML
     syck_emitter_flush( emitter, 0 );
     syck_free_emitter( emitter );
 
-    Safefree(bonus.tag);
+    Safefree(bonus->tag);
 
+    FREETMPS; LEAVE;
+
+    return;
+}
+
+
+SV*
 #ifdef YAML_IS_JSON
+DumpJSON
+#else
+DumpYAML
+#endif
+(SV *sv) {
+    SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
+    struct emitter_xtra bonus;
+    SV *out = newSVpvn("", 0);
+    bonus.out.outsv = out;
+#ifdef YAML_IS_JSON
+    DumpJSONImpl(sv, &bonus, perl_syck_output_handler_pv);
     if (SvCUR(out) > 0) {
         perl_json_postprocess(out);
     }
+#else
+    DumpYAMLImpl(sv, &bonus, perl_syck_output_handler_pv);
 #endif
-
 #ifdef SvUTF8_on
     if (SvTRUE(implicit_unicode)) {
         SvUTF8_on(out);
     }
 #endif
-
-    FREETMPS; LEAVE;
-
     return out;
+}
+
+int
+#ifdef YAML_IS_JSON
+DumpJSONFile
+#else
+DumpYAMLFile
+#endif
+(SV *sv, PerlIO *out) {
+    struct emitter_xtra bonus;
+    bonus.out.outio = out;
+    bonus.ioerror = 0;
+#ifdef YAML_IS_JSON
+    DumpJSONImpl(sv, &bonus, perl_syck_output_handler_io);
+    /* TODO: how do we do perl_json_postprocess? */
+#else
+    DumpYAMLImpl(sv, &bonus, perl_syck_output_handler_io);
+#endif
+    return bonus.ioerror;
+}
+
+int
+#ifdef YAML_IS_JSON
+DumpJSONInto
+#else
+DumpYAMLInto
+#endif
+(SV *sv, SV *out) {
+    SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
+    struct emitter_xtra bonus;
+    if (SvROK(out)) {
+        out = SvRV(out);
+        if (! SvPOK(out)) {
+            sv_setpv(out, "");
+        }
+    } else {
+        return 0; /* perl wrapper should die for us */
+    }
+    bonus.out.outsv = out;
+#ifdef YAML_IS_JSON
+    DumpJSONImpl(sv, &bonus, perl_syck_output_handler_mg);
+    if (SvCUR(out) > 0) { /* XXX: needs to handle magic? */
+        perl_json_postprocess(out);
+    }
+#else
+    DumpYAMLImpl(sv, &bonus, perl_syck_output_handler_mg);
+#endif
+#ifdef SvUTF8_on
+    if (SvTRUE(implicit_unicode)) {
+        SvUTF8_on(out); /* XXX: needs to handle magic? */
+    }
+#endif
+    return 1;
 }
 

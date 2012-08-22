@@ -32,10 +32,14 @@
 */
 
 struct emitter_xtra {
-    SV* port;
+    union {
+      SV* outsv;
+      PerlIO* outio;
+    } out;
     char* tag;
     char dump_code;
     bool implicit_binary;
+    int ioerror;
 };
 
 struct parser_xtra {
@@ -79,8 +83,24 @@ void perl_syck_error_handler(SyckParser *p, char *msg) {
         msg );
 }
 
-void perl_syck_output_handler(SyckEmitter *e, char *str, long len) {
+void perl_syck_output_handler_pv(SyckEmitter *e, char *str, long len) {
     struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
-    sv_catpvn_nomg(bonus->port, str, len);
+    sv_catpvn_nomg(bonus->out.outsv, str, len);
+}
+
+void perl_syck_output_handler_mg(SyckEmitter *e, char *str, long len) {
+    struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
+    sv_catpvn_mg(bonus->out.outsv, str, len);
+}
+
+void perl_syck_output_handler_io(SyckEmitter *e, char *str, long len) {
+    struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
+    if (bonus->ioerror) {
+        return;
+    } else {
+        int wrote = PerlIO_write(bonus->out.outio, str, len);
+        if (wrote != len)
+          bonus->ioerror = (errno ? errno : -1);
+    }
 }
 
