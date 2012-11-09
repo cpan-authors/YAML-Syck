@@ -596,10 +596,12 @@ syck_scan_scalar( int req_width, char *cursor, long len )
     /* scan string */
     for ( i = 0; i < len; i++ ) {
 
-        if ( ! ( cursor[i] == 0x9 ||
-                 cursor[i] == 0xA ||
-                 cursor[i] == 0xD ||
-               ( cursor[i] >= 0x20 && cursor[i] <= 0x7E ) )
+        if ( ! ( (unsigned)cursor[i] == 0x9 ||
+                 (unsigned)cursor[i] == 0xA ||
+                 (unsigned)cursor[i] == 0xD ||
+               ( (unsigned)cursor[i] >= 0x20 && (unsigned)cursor[i] <= 0x7E ) ||
+                 (unsigned)cursor[i] == 0x85 ||
+                 (unsigned)cursor[i] >= 0xa0 )
         ) {
             flags |= SCAN_NONPRINT;
         }
