@@ -320,7 +320,7 @@ yaml_syck_parser_handler
                 FREETMPS;
                 LEAVE;
 
-                if ( (*(pkg - 1) != '\0') && (*pkg != '\0') ) {
+                if ( load_blessed && (*(pkg - 1) != '\0') && (*pkg != '\0') ) {
                     sv_bless(sv, gv_stashpv(pkg, TRUE));
                 }
 
@@ -350,9 +350,11 @@ yaml_syck_parser_handler
                 }
 
                 sv = newRV_inc(sv);
-                if ( (*(pkg - 1) != '\0') && (*pkg != '\0') ) {
+
+                if ( load_blessed && (*(pkg - 1) != '\0') && (*pkg != '\0') ) {
                     sv_bless(sv, gv_stashpv(id + 12, TRUE));
                 }
+
             } else if ( (strEQ(id, "perl/regexp") || strnEQ( id, "perl/regexp:", 12 ) ) ) {
                 dSP;
                 SV *val = newSVpvn(n->data.str->ptr, n->data.str->len);
@@ -379,14 +381,16 @@ yaml_syck_parser_handler
                     type += 7;
                 }
 
-                if (lang == NULL || (strEQ(lang, "perl"))) {
-                    /* !perl/regexp on it's own causes no blessing */
-                    if ( (type != NULL) && strNE(type, "regexp") && (*type != '\0')) {
-                        sv_bless(sv, gv_stashpv(type, TRUE));
-                    }
-                }
-                else {
-                    sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+                if ( load_blessed ) {
+					if (lang == NULL || (strEQ(lang, "perl"))) {
+						/* !perl/regexp on it's own causes no blessing */
+						if ( (type != NULL) && strNE(type, "regexp") && (*type != '\0')) {
+							sv_bless(sv, gv_stashpv(type, TRUE));
+						}
+					}
+					else {
+						sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+					}
                 }
 #endif /* PERL_LOADMOD_NOIMPORT */
 #endif /* !YAML_IS_JSON */
@@ -465,29 +469,30 @@ yaml_syck_parser_handler
                 sv = newRV_noinc(val);
                 USE_OBJECT(val);
 
-                if (strnNE(ref_type, REF_LITERAL, REF_LITERAL_LENGTH+1)) {
-                    /* handle the weird audrey scalar ref stuff */
-                    sv_bless(sv, gv_stashpv(ref_type, TRUE));
-                }
-                else {
-                    /* bless it if necessary */
-                    char *lang = strtok(id, "/:");
-                    char *type = strtok(NULL, "");
+                if ( load_blessed ) {
+					if ( strnNE(ref_type, REF_LITERAL, REF_LITERAL_LENGTH+1)) {
+						/* handle the weird audrey scalar ref stuff */
+						sv_bless(sv, gv_stashpv(ref_type, TRUE));
+					}
+					else {
+						/* bless it if necessary */
+						char *lang = strtok(id, "/:");
+						char *type = strtok(NULL, "");
 
-                    if ( type != NULL && strnEQ(type, "ref:", 4)) {
-                        /* !perl/ref:Foo::Bar blesses into Foo::Bar */
-                        type += 4;
-                    }
-
-                    if (lang == NULL || (strEQ(lang, "perl"))) {
-                        /* !perl/ref on it's own causes no blessing */
-                        if ( (type != NULL) && strNE(type, "ref") && (*type != '\0')) {
-                            sv_bless(sv, gv_stashpv(type, TRUE));
-                        }
-                    }
-                    else {
-                        sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
-                    }
+						if ( type != NULL && strnEQ(type, "ref:", 4)) {
+							/* !perl/ref:Foo::Bar blesses into Foo::Bar */
+							type += 4;
+						}
+							if (lang == NULL || (strEQ(lang, "perl"))) {
+								/* !perl/ref on it's own causes no blessing */
+								if ( (type != NULL) && strNE(type, "ref") && (*type != '\0')) {
+									sv_bless(sv, gv_stashpv(type, TRUE));
+								}
+							}
+							else {
+								sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+							}
+					}
                 }
             }
             else if ( (id != NULL) && (strEQ(id, "perl/regexp") || strnEQ( id, "perl/regexp:", 12 ) ) ) {
@@ -511,29 +516,31 @@ yaml_syck_parser_handler
                 FREETMPS;
                 LEAVE;
 
-                if (strnNE(ref_type, REGEXP_LITERAL, REGEXP_LITERAL_LENGTH+1)) {
-                    /* handle the weird audrey scalar ref stuff */
-                    sv_bless(sv, gv_stashpv(ref_type, TRUE));
-                }
-                else {
-                    /* bless it if necessary */
-                    char *lang = strtok(id, "/:");
-                    char *type = strtok(NULL, "");
+                if ( load_blessed ) {
+					if (strnNE(ref_type, REGEXP_LITERAL, REGEXP_LITERAL_LENGTH+1)) {
+						/* handle the weird audrey scalar ref stuff */
+						sv_bless(sv, gv_stashpv(ref_type, TRUE));
+					}
+					else {
+						/* bless it if necessary */
+						char *lang = strtok(id, "/:");
+						char *type = strtok(NULL, "");
 
-                    if ( type != NULL && strnEQ(type, "regexp:", 7)) {
-                        /* !perl/regexp:Foo::Bar blesses into Foo::Bar */
-                        type += 7;
-                    }
+						if ( type != NULL && strnEQ(type, "regexp:", 7)) {
+							/* !perl/regexp:Foo::Bar blesses into Foo::Bar */
+							type += 7;
+						}
 
-                    if (lang == NULL || (strEQ(lang, "perl"))) {
-                        /* !perl/regexp on it's own causes no blessing */
-                        if ( (type != NULL) && strNE(type, "regexp") && (*type != '\0')) {
-                            sv_bless(sv, gv_stashpv(type, TRUE));
-                        }
-                    }
-                    else {
-                        sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
-                    }
+						if (lang == NULL || (strEQ(lang, "perl"))) {
+							/* !perl/regexp on it's own causes no blessing */
+							if ( (type != NULL) && strNE(type, "regexp") && (*type != '\0')) {
+								sv_bless(sv, gv_stashpv(type, TRUE));
+							}
+						}
+						else {
+							sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+						}
+					}
                 }
             }
             else if (id && strnEQ(id, "perl:YAML::Syck::BadAlias", 25-1)) {
@@ -543,7 +550,8 @@ yaml_syck_parser_handler
                 if (hv_store_ent(map, key, val, 0) != NULL)
                     USE_OBJECT(val);
                 sv = newRV_noinc((SV*)map);
-                sv_bless(sv, gv_stashpv("YAML::Syck::BadAlias", TRUE));
+                if ( load_blessed )
+                    sv_bless(sv, gv_stashpv("YAML::Syck::BadAlias", TRUE));
             }
             else
 #endif
