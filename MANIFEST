@@ -28,6 +28,7 @@ lib/YAML/Loader/Syck.pm
 lib/YAML/Syck.pm
 Makefile.PL
 MANIFEST			This list of files
+META.json
 META.yml
 node.c
 perl_common.h
@@ -64,6 +65,7 @@ t/json-numbers.t
 t/json-refs.t
 t/json-singlequote.t
 t/leak.t
+t/load-blessed.t
 t/meta.t
 t/TestYAML.pm
 t/yaml-alias.t
@@ -72,4 +74,5 @@ t/yaml-dumpinto.t
 t/yaml-implicit-warnings.t
 t/yaml-str-colon-first.t
 t/yaml-tie.t
+t/yaml-utf.t
 token.c
