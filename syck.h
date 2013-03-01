@@ -349,6 +349,8 @@ struct _syck_emitter {
     SyckLevel *levels;
     int lvl_idx;
     int lvl_capa;
+    int max_depth;
+    int depth;
     /* Pointer for extension's use */
     void *bonus;
 };

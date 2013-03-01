@@ -122,6 +122,8 @@ syck_new_emitter()
     e->best_width = 80;
     e->style = scalar_none;
     e->stage = doc_open;
+    e->depth = 0;
+    e->max_depth = 512;
     e->indent = 2;
     e->level = -1;
     e->anchors = NULL;
@@ -1348,8 +1350,9 @@ syck_emitter_mark_node( SyckEmitter *e, st_data_t n )
             st_insert( e->anchors, (st_data_t)oid, (st_data_t)anchor_name );
         }
 
+        /* XXX - Removed by BDRACO as the perl_syck.h now has a max_depth - XXX */
+        /* return 0; */
         /* XXX - Added by Audrey Tang to handle self-recursive structures - XXX */
-        return 0;
     }
     return oid;
 }

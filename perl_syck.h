@@ -21,6 +21,7 @@
 #  define NULL_LITERAL  "null"
 #  define NULL_LITERAL_LENGTH 4
 #  define SCALAR_NUMBER scalar_none
+int json_max_depth = 512;
 char json_quote_char = '"';
 static enum scalar_style json_quote_style = scalar_2quote;
 #  define SCALAR_STRING json_quote_style
@@ -805,17 +806,28 @@ json_syck_mark_emitter
 yaml_syck_mark_emitter
 #endif
 (SyckEmitter *e, SV *sv) {
+#ifdef YAML_IS_JSON
+    e->depth++;
+#endif
+
     if (syck_emitter_mark_node(e, (st_data_t)sv) == 0) {
 #ifdef YAML_IS_JSON
-        croak("Dumping circular structures is not supported with JSON::Syck");
+        e->depth--;
 #endif
         return;
     }
+
+#ifdef YAML_IS_JSON
+    if (e->depth >= e->max_depth) {
+        croak("Dumping circular structures is not supported with JSON::Syck, consider increasing $JSON::Syck::MaxDepth higher then %d.", e->max_depth);
+    }
+#endif
 
     if (SvROK(sv)) {
         PERL_SYCK_MARK_EMITTER(e, SvRV(sv));
 #ifdef YAML_IS_JSON
         st_insert(e->markers, (st_data_t)sv, 0);
+        e->depth--;
 #endif
         return;
     }
@@ -855,6 +867,7 @@ yaml_syck_mark_emitter
 
 #ifdef YAML_IS_JSON
     st_insert(e->markers, (st_data_t)sv, 0);
+    --e->depth;
 #endif
 }
 
@@ -1242,6 +1255,8 @@ DumpYAMLImpl
     json_quote_char      = (SvTRUE(singlequote) ? '\'' : '"' );
     json_quote_style     = (SvTRUE(singlequote) ? scalar_2quote_1 : scalar_2quote );
     emitter->indent      = PERL_SYCK_INDENT_LEVEL;
+    SV *max_depth        = GvSV(gv_fetchpv(form("%s::MaxDepth", PACKAGE_NAME), TRUE, SVt_PV));
+    emitter->max_depth   = SvIOK(max_depth) ? SvIV(max_depth) : json_max_depth;
 #else
     SV *singlequote      = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
     yaml_quote_style     = (SvTRUE(singlequote) ? scalar_1quote : scalar_none);
