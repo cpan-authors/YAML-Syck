@@ -60,6 +60,7 @@ sub DumpInto {
 }
 
 $JSON::Syck::ImplicitTyping  = 1;
+$JSON::Syck::MaxDepth        = 512;
 $JSON::Syck::Headless        = 1;
 $JSON::Syck::ImplicitUnicode = 0;
 $JSON::Syck::SingleQuote     = 0;
@@ -141,6 +142,13 @@ as in:
   JSON (UTF-8 flagged) => Perl (UTF-8 flagged)
   Perl (UTF-8 bytes)   => JSON (UTF-8 flagged)
   Perl (UTF-8 flagged) => JSON (UTF-8 flagged)
+
+By default, JSON::Syck::Dump will only transverse up to 512 levels of
+a datastructure in order to avoid an infinite loop when it is
+presented with an circular reference.
+
+However, you set C<$JSON::Syck::MaxLevels> to a larger value if you
+have very complex structures.
 
 Unfortunately, there's no implicit way to dump Perl UTF-8 flagged data
 structure to utf-8 encoded JSON. To do this, simply use Encode module, e.g.:
