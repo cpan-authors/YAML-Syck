@@ -1,4 +1,9 @@
-[Changes for 1.24_01 - 2013-02-26]
+[Changes for 1.24_02 - 2013-03-01]
+
+* Prevent YAML from being influnced by the previous
+  change
+
+[Changes for 1.24_01 - 2013-03-01]
 
 * Implement $JSON::Syck::MaxDepth
 * Prevent failure when the same object is seen twice during Dump.

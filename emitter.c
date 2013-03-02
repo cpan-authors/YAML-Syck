@@ -1298,7 +1298,7 @@ void syck_emit_end( SyckEmitter *e )
  * soon-to-be-emitted tree.
  */
 SYMID
-syck_emitter_mark_node( SyckEmitter *e, st_data_t n )
+syck_emitter_mark_node( SyckEmitter *e, st_data_t n, int flags )
 {
     SYMID oid = 0;
     char *anchor_name = NULL;
@@ -1350,8 +1350,10 @@ syck_emitter_mark_node( SyckEmitter *e, st_data_t n )
             st_insert( e->anchors, (st_data_t)oid, (st_data_t)anchor_name );
         }
 
-        /* XXX - Removed by BDRACO as the perl_syck.h now has a max_depth - XXX */
-        /* return 0; */
+        /* XXX - Flag added by BDRACO as the perl_syck.h now has a max_depth - XXX */
+        if (! (flags & EMITTER_MARK_NODE_FLAG_PERMIT_DUPLICATE_NODES) ) {
+            return 0;
+        }
         /* XXX - Added by Audrey Tang to handle self-recursive structures - XXX */
     }
     return oid;

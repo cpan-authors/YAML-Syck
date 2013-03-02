@@ -15,12 +15,14 @@
 #undef PERL_SYCK_EMITTER_HANDLER
 #undef PERL_SYCK_INDENT_LEVEL
 #undef PERL_SYCK_MARK_EMITTER
+#undef PERL_SYCK_EMITTER_MARK_NODE_FLAGS
 
 #ifdef YAML_IS_JSON
 #  define PACKAGE_NAME  "JSON::Syck"
 #  define NULL_LITERAL  "null"
 #  define NULL_LITERAL_LENGTH 4
 #  define SCALAR_NUMBER scalar_none
+#  define PERL_SYCK_EMITTER_MARK_NODE_FLAGS EMITTER_MARK_NODE_FLAG_PERMIT_DUPLICATE_NODES
 int json_max_depth = 512;
 char json_quote_char = '"';
 static enum scalar_style json_quote_style = scalar_2quote;
@@ -45,6 +47,7 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define NULL_LITERAL  "~"
 #  define NULL_LITERAL_LENGTH 1
 #  define SCALAR_NUMBER scalar_none
+#  define PERL_SYCK_EMITTER_MARK_NODE_FLAGS 0
 static enum scalar_style yaml_quote_style = scalar_none;
 #  define SCALAR_STRING yaml_quote_style
 #  define SCALAR_QUOTED scalar_1quote
@@ -810,7 +813,7 @@ yaml_syck_mark_emitter
     e->depth++;
 #endif
 
-    if (syck_emitter_mark_node(e, (st_data_t)sv) == 0) {
+    if (syck_emitter_mark_node(e, (st_data_t)sv, PERL_SYCK_EMITTER_MARK_NODE_FLAGS) == 0) {
 #ifdef YAML_IS_JSON
         e->depth--;
 #endif
@@ -1252,10 +1255,10 @@ DumpYAMLImpl
     SV *sortkeys         = GvSV(gv_fetchpv(form("%s::SortKeys", PACKAGE_NAME), TRUE, SVt_PV));
 #ifdef YAML_IS_JSON
     SV *singlequote      = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *max_depth        = GvSV(gv_fetchpv(form("%s::MaxDepth", PACKAGE_NAME), TRUE, SVt_PV));
     json_quote_char      = (SvTRUE(singlequote) ? '\'' : '"' );
     json_quote_style     = (SvTRUE(singlequote) ? scalar_2quote_1 : scalar_2quote );
     emitter->indent      = PERL_SYCK_INDENT_LEVEL;
-    SV *max_depth        = GvSV(gv_fetchpv(form("%s::MaxDepth", PACKAGE_NAME), TRUE, SVt_PV));
     emitter->max_depth   = SvIOK(max_depth) ? SvIV(max_depth) : json_max_depth;
 #else
     SV *singlequote      = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
