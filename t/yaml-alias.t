@@ -35,7 +35,7 @@ $undumped = { abc => {}, def => {} };
 $undumped->{abc}->{sibling} = $undumped->{def};
 $undumped->{def}->{sibling} = $undumped->{abc};
 $roundtripped               = Load( Dump($undumped) );
-is( Dump($roundtripped), Dump($undumped), "circular" );
+is_deeply( $roundtripped, $undumped, "circular" );
 
 $undumped->{def}->{sibling}     = {};
 $roundtripped->{def}->{sibling} = {};
