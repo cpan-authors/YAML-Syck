@@ -122,7 +122,7 @@ dereferences to get the actual scalar value.
 
 JSON::Syck raises an exception when you pass in circular references.
 
-If you want to serialize self refernecing stuff, you should use
+If you want to serialize self referencing stuff, you should use
 YAML which supports it.
 
 =head2 SUBROUTINE REFERENCE
