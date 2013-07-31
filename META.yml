@@ -25,4 +25,4 @@ resources:
   homepage: http://search.cpan.org/dist/YAML-Syck
   license: http://opensource.org/licenses/mit-license.php
   repository: http://github.com/toddr/YAML-Syck
-version: 1.26
+version: 1.27

@@ -12,6 +12,7 @@ sub import {
     plan @_;
 
     *::ok        = *ok;
+    *::like      = *like;
     *::is        = *is;
     *::is_deeply = *is_deeply;
     *::roundtrip = *roundtrip;

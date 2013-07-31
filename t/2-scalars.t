@@ -145,6 +145,7 @@ Troz:
 
 is( Dump( scalar Load($recurse1) ), $recurse1, 'recurse 1' );
 
+# We wanna verify the circular ref but we can't garuntuee numbering after 5.18.0 changed the hash algorithm
 my $recurse2 = << '.';
 --- &1 
 Bar: 
@@ -161,7 +162,22 @@ Zort: &2
   parent: *1
 .
 
-is( Dump( scalar Load($recurse2) ), $recurse2, 'recurse 2' );
+my $recurse2want = qr{^---\s\&(\d+)\s*\n
+Bar:\s*\n
+\s\sparent:\s*\*\1\n
+Baz:\s*\n
+\s\sparent:\s*\*\1\n
+Foo:\s*\n
+\s\sparent:\s*\*\1\n
+Troz:\s*\n
+\s\sparent:\s*\*\1\n
+Zort:\s&(?!\1)(\d+)\s*\n
+\s\sPoit:\s\n
+\s\s\s\sparent:\s+\*\2\n
+\s\sparent:\s+\*\1
+}xms;
+
+like( Dump( scalar Load($recurse2) ), $recurse2want, 'recurse 2' );
 
 is( Dump( 1, 2, 3 ), "--- 1\n--- 2\n--- 3\n" );
 is( "@{[Load(Dump(1, 2, 3))]}", "1 2 3" );
