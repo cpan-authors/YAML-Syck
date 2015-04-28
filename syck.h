@@ -39,7 +39,9 @@
 #endif
 
 #include <stddef.h>
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L && !defined(VMS)
 #include <stdint.h>
+#endif
 #include <stdio.h>
 #include <ctype.h>
 #ifdef HAVE_ST_H
