@@ -1,4 +1,5 @@
 use strict;
+use lib ".";
 use t::TestYAML ();
 use Data::Dumper;
 use Test::More;

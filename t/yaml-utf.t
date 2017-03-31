@@ -3,6 +3,7 @@ use warnings;
 
 use utf8;
 
+use lib ".";
 use t::TestYAML ();
 use Test::More tests => 3;
 use YAML::Syck;

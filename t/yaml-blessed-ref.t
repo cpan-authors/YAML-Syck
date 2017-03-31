@@ -1,4 +1,5 @@
 use strict;
+use lib ".";
 use t::TestYAML tests => 1;
 use YAML::Syck;
 use Data::Dumper;

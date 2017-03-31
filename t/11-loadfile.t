@@ -1,3 +1,4 @@
+use lib ".";
 use t::TestYAML;
 use Test::More;
 use FindBin '$RealBin';

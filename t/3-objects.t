@@ -1,3 +1,4 @@
+use lib ".";
 use t::TestYAML tests => 51,
   (
       ( $] < 5.008 )

@@ -1,3 +1,4 @@
+use lib ".";
 use t::TestYAML;
 use JSON::Syck;
 use Test::More;
