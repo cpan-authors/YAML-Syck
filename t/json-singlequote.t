@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 
+use lib ".";
 use t::TestYAML ();
 use Test::More tests => 5;
 use JSON::Syck;

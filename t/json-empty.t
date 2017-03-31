@@ -1,4 +1,5 @@
 use strict;
+use lib ".";
 use t::TestYAML ();
 use Test::More tests => 1;
 use JSON::Syck;

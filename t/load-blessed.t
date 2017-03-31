@@ -1,3 +1,4 @@
+use lib ".";
 use t::TestYAML tests => 11;
 
 ok( YAML::Syck->VERSION );

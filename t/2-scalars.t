@@ -1,3 +1,4 @@
+use lib ".";
 use t::TestYAML tests => 134;
 
 ok( YAML::Syck->VERSION, "YAML::Syck has a version and is loaded" );
