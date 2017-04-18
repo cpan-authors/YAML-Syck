@@ -1,3 +1,11 @@
+[Changes for 1.29_02 - 2016-03-03]
+
+* Fix handling carriage return after c-indicator RT 41141
+* Fix CHECK_UTF8 SEGV with empty len=0 strings RT 61562
+* Add missing function declarations
+* Tighten the TODO tests, no passing TODOs now. But still JSON
+  SingleQuote and \/ and \u roundtrips do fail.
+
 [Changes for 1.29_01 - 2014-12-14]
 
 * Experimentally try patch from RT 83825. Will release if no test failures or complaints.
