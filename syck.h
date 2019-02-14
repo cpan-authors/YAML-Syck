@@ -1,10 +1,4 @@
 #include "config.h"
-#ifdef I_STDLIB
-#define HAVE_STDLIB_H
-#endif
-#ifdef I_STRING
-#define HAVE_STRING_H
-#endif
 
 /*
  * syck.h
@@ -26,12 +20,7 @@
 
 /* Unconditionally added as part of perl's headers anyway: */
 #include <stdlib.h>
-
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 #ifdef HAVE_INTRINSICS_H
 # include <intrinsics.h>
