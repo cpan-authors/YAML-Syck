@@ -22,3 +22,7 @@
 ^\.travis.yml$
 ^YAML-Syck-\d\.\d+/
 ^cpanfile$
++^.github/
+^.git/.*
+^.gitignore
+^.perltidyrc
