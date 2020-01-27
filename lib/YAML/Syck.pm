@@ -3,37 +3,22 @@ package YAML::Syck;
 # See documentation after the __END__ mark.
 
 use strict;
-use vars qw(
-  @ISA @EXPORT @EXPORT_OK $VERSION
-  $Headless $SortKeys $SingleQuote
-  $ImplicitBinary $ImplicitTyping $ImplicitUnicode
-  $UseCode $LoadCode $DumpCode
-  $DeparseObject $LoadBlessed
-);
+
+our ( $Headless, $SingleQuote, $ImplicitBinary, $ImplicitTyping, $ImplicitUnicode, $UseCode, $LoadCode, $DumpCode, $DeparseObject );
+
 use 5.006;
 use Exporter;
+use XSLoader ();
 
-BEGIN {
-    $VERSION   = '1.31';
-    @EXPORT    = qw( Dump Load DumpFile LoadFile );
-    @EXPORT_OK = qw( DumpInto );
-    @ISA       = qw( Exporter );
+our $VERSION   = '1.31';
+our @EXPORT    = qw( Dump Load DumpFile LoadFile );
+our @EXPORT_OK = qw( DumpInto );
+our @ISA       = qw( Exporter );
 
-    $SortKeys    = 1;
-    $LoadBlessed = 1;
+our $SortKeys    = 1;
+our $LoadBlessed = 1;
 
-    local $@;
-    eval {
-        require XSLoader;
-        XSLoader::load( __PACKAGE__, $VERSION );
-        1;
-    } or do {
-        require DynaLoader;
-        push @ISA, 'DynaLoader';
-        __PACKAGE__->bootstrap($VERSION);
-    };
-
-}
+XSLoader::load( 'YAML::Syck', $VERSION );
 
 use constant QR_MAP => {
     ''   => sub { qr{$_[0]} },
