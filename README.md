@@ -103,12 +103,13 @@ both `$YAML::Syck::LoadCode` and `$YAML::Syck::DumpCode` to true.
 
 ## $YAML::Syck::LoadBlessed
 
-Defaults to true. Setting to false will block YAML::Syck from doing ANY
-blessing. This is an interface change since 1.21. The variable name was
-misleading, implying that no blessing would happen when in fact it did.
+Defaults to false. Setting to true will allow YAML::Syck to bless objects as it
+imports objects. This default changed in 1.32.
 
-Prior to 1.22, setting this to a false value only prevented `Load` from
-blessing tag names that did not begin with `!!perl` or `!perl`;.
+You can create any kind of object with YAML. The creation itself is not the
+critical part. If the class has a DESTROY method, it will be called once the
+object is deleted. An example with File::Temp removing files can be found at
+[https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=862373](https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=862373)
 
 # BUGS
 
