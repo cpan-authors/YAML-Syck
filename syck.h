@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
 #ifdef HAVE_ST_H
 #include <st.h>
 #else
