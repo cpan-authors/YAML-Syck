@@ -1,7 +1,12 @@
 
 1.33 Oct 26 2020
 
-- 
+- #52 Fix memory corruption.
+- #53 Fix for handling circular aliases.
+- #56 syck.h: unconditionally include stdlib.h
+- Switch changelog to a more parsible format.
+- Update github CI to use a cpanfile.
+- Update Devel::PPPort to 3.62
 
 1.32 Jan 27 2020
 
