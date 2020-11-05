@@ -71,7 +71,7 @@ sub _is_glob {
 
     return 1 if ( ref($h) eq 'GLOB' );
     return 1 if ( ref( \$h ) eq 'GLOB' );
-    return 1 if ( ref($h) =~ m/^IO::/ );
+    return 1 if ( index( ref($h), 'IO::' ) == 0 );
 
     return;
 }
