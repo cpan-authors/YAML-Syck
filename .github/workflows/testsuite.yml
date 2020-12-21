@@ -104,7 +104,7 @@ jobs:
       - run: make test
 
   windows:
-    needs: [ubuntu, linux]
+    needs: [ubuntu]
     runs-on: windows-latest
 
     steps:
@@ -112,7 +112,12 @@ jobs:
       - name: Set up Perl
         run: |
           choco install strawberryperl
-          echo "##[add-path]C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin"
+          echo @"
+          C:\strawberry\c\bin
+          C:\strawberry\perl\site\bin
+          C:\strawberry\perl\bin
+          "@ |
+            Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: perl -V
         run: perl -V
       - name: Install Dependencies
