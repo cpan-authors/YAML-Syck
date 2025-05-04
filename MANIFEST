@@ -36,6 +36,7 @@ t/bug/doesnt-stringify.t
 t/bug/rt-41141.t
 t/bug/rt-49404-double_free.t
 t/bug/rt-54167.t
+t/escape-special-chars.t
 t/json-basic.t
 t/json-circular-ref.t
 t/json-crlf.t
