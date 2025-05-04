@@ -5,9 +5,9 @@
  * $Date: 2006-05-09 12:03:50 +0800 (二, 09  5 2006) $
  *
  * Copyright (C) 2003 why the lucky stiff
- * 
+ *
  * All Base64 code from Ruby's pack.c.
- * Ruby is Copyright (C) 1993-2003 Yukihiro Matsumoto 
+ * Ruby is Copyright (C) 1993-2003 Yukihiro Matsumoto
  */
 #include <stdio.h>
 #include <string.h>
@@ -16,7 +16,7 @@
 
 #define DEFAULT_ANCHOR_FORMAT "id%03d"
 
-const unsigned char hex_table[] = 
+const unsigned char hex_table[] =
 "0123456789ABCDEF";
 static unsigned char b64_table[] =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -137,7 +137,7 @@ syck_new_emitter()
     e->output_handler = NULL;
     e->lvl_idx = 0;
     e->lvl_capa = ALLOC_CT;
-    e->levels = S_ALLOC_N( SyckLevel, e->lvl_capa ); 
+    e->levels = S_ALLOC_N( SyckLevel, e->lvl_capa );
     syck_emitter_reset_levels( e );
     e->bonus = NULL;
     return e;
@@ -203,7 +203,7 @@ syck_emitter_pop_level( SyckEmitter *e )
     free( e->levels[e->lvl_idx].domain );
 }
 
-void 
+void
 syck_emitter_add_level( SyckEmitter *e, int len, enum syck_level_status status )
 {
     ASSERT( e != NULL );
@@ -295,7 +295,7 @@ syck_emitter_write( SyckEmitter *e, const char *str, long len )
     {
         syck_emitter_clear( e );
     }
-    
+
     /*
      * Flush if at end of buffer
      */
@@ -366,7 +366,7 @@ syck_emit( SyckEmitter *e, st_data_t n )
     int indent = 0;
     SyckLevel *parent;
     SyckLevel *lvl = syck_emitter_current_level( e );
-    
+
     /*
      * Determine headers.
      */
@@ -498,7 +498,7 @@ void syck_emit_tag( SyckEmitter *e, const char *tag, const char *ignore )
     lvl->anctag = 1;
 }
 
-/* 
+/*
  * Emit a newline and an appropriately spaced indent.
  */
 void syck_emit_indent( SyckEmitter *e )
@@ -582,7 +582,7 @@ syck_scan_scalar( int req_width, char *cursor, long len )
     } else if ( len > 1 && cursor[len-2] == '\n' ) {
         flags |= SCAN_MANYNL_E;
     }
-    if ( 
+    if (
         ( len > 0 && ( cursor[0] == ' ' || cursor[0] == '\t' ) ) ||
         ( len > 1 && ( cursor[len-1] == ' ' || cursor[len-1] == '\t' ) )
     ) {
@@ -609,7 +609,7 @@ syck_scan_scalar( int req_width, char *cursor, long len )
             flags |= SCAN_NEWLINE;
             if ( len - i >= 3 && strncmp( &cursor[i+1], "---", 3 ) == 0 )
                 flags |= SCAN_DOCSEP;
-            if ( cursor[i+1] == ' ' || cursor[i+1] == '\t' ) 
+            if ( cursor[i+1] == ' ' || cursor[i+1] == '\t' )
                 flags |= SCAN_INDENTED;
             if ( req_width > 0 && i - start > req_width )
                 flags |= SCAN_WIDE;
@@ -633,12 +633,12 @@ syck_scan_scalar( int req_width, char *cursor, long len )
         }
         /* remember, if plain collections get implemented, to add nb-plain-flow-char */
         else if ( ( cursor[i] == ' ' && cursor[i+1] == '#' ) ||
-                  ( cursor[i] == ':' && 
+                  ( cursor[i] == ':' &&
                     ( cursor[i+1] == ' ' || cursor[i+1] == '\n' || i == len - 1 ) ) )
         {
             flags |= SCAN_INDIC_C;
         }
-        else if ( cursor[i] == ',' && 
+        else if ( cursor[i] == ',' &&
                   ( cursor[i+1] == ' ' || cursor[i+1] == '\n' || i == len - 1 ) )
         {
             flags |= SCAN_FLOWMAP;
@@ -661,12 +661,12 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     SyckLevel *lvl = syck_emitter_current_level( e );
     int scan = 0;
     char *implicit;
-    
+
     if ( str == NULL ) str = "";
 
     /* No empty nulls as map keys */
-    if ( len == 0 && ( parent->status == syck_lvl_map || parent->status == syck_lvl_imap ) && 
-         parent->ncount % 2 == 1 && syck_tagcmp( tag, "tag:yaml.org,2002:null" ) == 0 ) 
+    if ( len == 0 && ( parent->status == syck_lvl_map || parent->status == syck_lvl_imap ) &&
+         parent->ncount % 2 == 1 && syck_tagcmp( tag, "tag:yaml.org,2002:null" ) == 0 )
     {
         str = "~";
         len = 1;
@@ -678,7 +678,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     /* quote strings which default to implicits */
     if (
             (
-                (strncmp( implicit, "bool", 4 ) == 0) || 
+                (strncmp( implicit, "bool", 4 ) == 0) ||
                 (strncmp( implicit, "null", 4 ) == 0)
             )
             &&
@@ -690,8 +690,8 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     } else {
         /* complex key -- disabled by Audrey Tang -/
         if ( parent->status == syck_lvl_map && parent->ncount % 2 == 1 &&
-             ( !( tag == NULL || 
-             ( implicit != NULL && syck_tagcmp( tag, implicit ) == 0 && e->explicit_typing == 0 ) ) ) ) 
+             ( !( tag == NULL ||
+             ( implicit != NULL && syck_tagcmp( tag, implicit ) == 0 && e->explicit_typing == 0 ) ) ) )
         {
             syck_emitter_write( e, "? ", 2 );
             parent->status = syck_lvl_mapx;
@@ -955,7 +955,17 @@ void syck_emit_2quoted( SyckEmitter *e, int width, char *str, long len )
 
             /* Escape sequences allowed within double quotes. */
             case '"':  syck_emitter_write( e, "\\\"", 2 ); break;
-            case '\\': syck_emitter_write( e, "\\\\", 2 ); break;
+            case '\\':
+                /* Check if next char is a special char that needs escaping */
+                if (mark + 1 < str + len &&
+                    (mark[1] == 't' || mark[1] == 'r' || mark[1] == 'n' ||
+                     mark[1] == '0' || mark[1] == 'a' || mark[1] == 'b' ||
+                     mark[1] == 'f' || mark[1] == 'v' || mark[1] == 'e')) {
+                    syck_emitter_write( e, "\\\\", 2 );
+                } else {
+                    syck_emitter_write( e, "\\\\", 2 );
+                }
+                break;
             case '\0': syck_emitter_write( e, "\\0",  2 ); break;
             case '\a': syck_emitter_write( e, "\\a",  2 ); break;
             case '\b': syck_emitter_write( e, "\\b",  2 ); break;
@@ -965,18 +975,6 @@ void syck_emit_2quoted( SyckEmitter *e, int width, char *str, long len )
             case '\v': syck_emitter_write( e, "\\v",  2 ); break;
             case 0x1b: syck_emitter_write( e, "\\e",  2 ); break;
             case '\n': syck_emitter_write( e, "\\n",  2 ); break;
-
-            /* XXX - Disabled by Audrey Tang for YAML.pm compat
-            case '\n':
-                end = mark + 1;
-                syck_emitter_write( e, "\\n", 2 );
-                do_indent = e->indent;
-                start = mark + 1;
-                if ( start < str + len && ( *start == ' ' || *start == '\n' ) ) {
-                    do_indent = 0;
-                }
-            break;
-            */
 
             case ' ':
                 if ( width > 0 && *start != ' ' && mark - end > width ) {
@@ -1356,4 +1354,3 @@ syck_emitter_mark_node( SyckEmitter *e, st_data_t n, int flags )
     }
     return oid;
 }
-
