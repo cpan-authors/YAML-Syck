@@ -59,14 +59,16 @@ static struct st_hash_type type_strhash = {
     strhash,
 };
 
-static void rehash();
+static void rehash(register st_table *table);
 
 #define alloc(type) (type*)malloc((unsigned)sizeof(type))
 #define Calloc(n,s) (char*)calloc((n),(s))
 
-#define EQUAL(table,x,y) ((x)==(y) || (*table->type->compare)((x),(y)) == 0)
+typedef int (*(do_equal_func))(char *, char *);
+#define EQUAL(table,x,y) ((x)==(y) || (((do_equal_func)(*table->type->compare))((x),(y))) == 0)
 
-#define do_hash(key,table) (unsigned int)(*(table)->type->hash)((key))
+typedef int (*(do_hash_func))(char *);
+#define do_hash(key,table) (unsigned int)((do_hash_func)(*(table)->type->hash))((key))
 #define do_hash_bin(key,table) (do_hash(key, table)%(table)->num_bins)
 
 /*
@@ -475,14 +477,14 @@ st_cleanup_safe(table, never)
 {
     int num_entries = table->num_entries;
 
-    st_foreach(table, (enum st_retval (*)())delete_never, never);
+    st_foreach(table, (enum st_retval (*)(char*, char*, char*))delete_never, never);
     table->num_entries = num_entries;
 }
 
 void
 st_foreach(table, func, arg)
     st_table *table;
-    enum st_retval (*func)();
+    enum st_retval (*func)(char*, char*, char*);
     char *arg;
 {
     st_table_entry *ptr, *last, *tmp;

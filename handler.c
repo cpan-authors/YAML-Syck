@@ -46,7 +46,7 @@ syck_hdlr_add_anchor( SyckParser *p, char *a, SyckNode *n )
     if ( p->bad_anchors != NULL )
     {
         SyckNode *bad;
-        if ( st_lookup( p->bad_anchors, (st_data_t)a, (st_data_t *)&bad ) )
+        if ( st_lookup( p->bad_anchors, (char*)(st_data_t)a, (char* *)(st_data_t *)&bad ) )
         {
             if ( n->kind != syck_str_kind )
             {
@@ -59,14 +59,14 @@ syck_hdlr_add_anchor( SyckParser *p, char *a, SyckNode *n )
     {
         p->anchors = st_init_strtable();
     }
-    if ( st_lookup( p->anchors, (st_data_t)a, (st_data_t *)&ntmp ) )
+    if ( st_lookup( p->anchors, (char*)(st_data_t)a, (char* *)(st_data_t *)&ntmp ) )
     {
         if ( ntmp != (void *)1 )
         {
             syck_free_node( ntmp );
         }
     }
-    st_insert( p->anchors, (st_data_t)a, (st_data_t)n );
+    st_insert( p->anchors, (char*)(st_data_t)a, (char*)(st_data_t)n );
     return n;
 }
 
@@ -79,14 +79,14 @@ syck_hdlr_remove_anchor( SyckParser *p, char *a )
     {
         p->anchors = st_init_strtable();
     }
-    if ( st_delete( p->anchors, (st_data_t *)&atmp, (st_data_t *)&ntmp ) )
+    if ( st_delete( p->anchors, (char* *)(st_data_t *)&atmp, (char* *)(st_data_t *)&ntmp ) )
     {
         if ( ntmp != (void *)1 )
         {
             syck_free_node( ntmp );
         }
     }
-    st_insert( p->anchors, (st_data_t)a, (st_data_t)1 );
+    st_insert( p->anchors, (char*)(st_data_t)a, (char*)(st_data_t)1 );
 }
 
 SyckNode *
@@ -96,7 +96,7 @@ syck_hdlr_get_anchor( SyckParser *p, char *a )
 
     if ( p->anchors != NULL )
     {
-        if ( st_lookup( p->anchors, (st_data_t)a, (st_data_t *)&n ) )
+        if ( st_lookup( p->anchors, (char*)(st_data_t)a, (char* *)(st_data_t *)&n ) )
         {
             if ( n != (void *)1 )
             {    
@@ -109,10 +109,10 @@ syck_hdlr_get_anchor( SyckParser *p, char *a )
                 {
                     p->bad_anchors = st_init_strtable();
                 }
-                if ( ! st_lookup( p->bad_anchors, (st_data_t)a, (st_data_t *)&n ) )
+                if ( ! st_lookup( p->bad_anchors, (char*)(st_data_t)a, (char* *)(st_data_t *)&n ) )
                 {
                     n = (p->bad_anchor_handler)( p, a );
-                    st_insert( p->bad_anchors, (st_data_t)a, (st_data_t)n );
+                    st_insert( p->bad_anchors, (char*)(st_data_t)a, (char*)(st_data_t)n );
                 }
             }
         }
