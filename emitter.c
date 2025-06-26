@@ -143,7 +143,7 @@ syck_new_emitter()
     return e;
 }
 
-int
+enum st_retval
 syck_st_free_anchors( char *key, char *name, char *arg )
 {
     S_FREE( name );
@@ -397,15 +397,15 @@ syck_emit( SyckEmitter *e, st_data_t n )
 
     /* Look for anchor */
     if ( e->anchors != NULL &&
-        st_lookup( e->markers, n, (st_data_t *)&oid ) &&
-        st_lookup( e->anchors, (st_data_t)oid, (st_data_t *)&anchor_name ) )
+        st_lookup( e->markers, (char*)n, (char* *)&oid ) &&
+        st_lookup( e->anchors, (char*)(st_data_t)oid, (char* *)(st_data_t *)&anchor_name ) )
     {
         if ( e->anchored == NULL )
         {
             e->anchored = st_init_numtable();
         }
 
-        if ( ! st_lookup( e->anchored, (st_data_t)anchor_name, 0 ) )
+        if ( ! st_lookup( e->anchored, (char*)(st_data_t)anchor_name, (char* *)0 ) )
         {
             char *an = S_ALLOC_N( char, strlen( anchor_name ) + 3 );
             sprintf( an, "&%s ", anchor_name );
@@ -419,7 +419,7 @@ syck_emit( SyckEmitter *e, st_data_t n )
             syck_emitter_write( e, an, strlen( anchor_name ) + 2 );
             free( an );
 
-            st_insert( e->anchored, (st_data_t)anchor_name, 0 );
+            st_insert( e->anchored, (char*)(st_data_t)anchor_name, 0 );
             lvl->anctag = 1;
         }
         else
@@ -1312,13 +1312,13 @@ syck_emitter_mark_node( SyckEmitter *e, st_data_t n, int flags )
      * object.  Doesn't yet create an anchor, simply notes the
      * position.
      */
-    if ( ! st_lookup( e->markers, n, (st_data_t *)&oid ) )
+    if ( ! st_lookup( e->markers, (char*)n, (char* *)(st_data_t *)&oid ) )
     {
         /*
          * Store all markers
          */
         oid = e->markers->num_entries + 1;
-        st_insert( e->markers, n, (st_data_t)oid );
+        st_insert( e->markers, (char*)n, (char*)(st_data_t)oid );
     }
     else
     {
@@ -1327,7 +1327,7 @@ syck_emitter_mark_node( SyckEmitter *e, st_data_t n, int flags )
             e->anchors = st_init_numtable();
         }
 
-        if ( ! st_lookup( e->anchors, (st_data_t)oid, (st_data_t *)&anchor_name ) )
+        if ( ! st_lookup( e->anchors, (char*)(st_data_t)oid, (char* *)(st_data_t *)&anchor_name ) )
         {
             int idx = 0;
             char *anc = ( e->anchor_format == NULL ? DEFAULT_ANCHOR_FORMAT : e->anchor_format );
@@ -1343,7 +1343,7 @@ syck_emitter_mark_node( SyckEmitter *e, st_data_t n, int flags )
             /*
              * Insert into anchors table
              */
-            st_insert( e->anchors, (st_data_t)oid, (st_data_t)anchor_name );
+            st_insert( e->anchors, (char*)(st_data_t)oid, (char*)(st_data_t)anchor_name );
         }
 
         /* XXX - Flag added by BDRACO as the perl_syck.h now has a max_depth - XXX */

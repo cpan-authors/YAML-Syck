@@ -184,7 +184,7 @@ syck_add_sym( SyckParser *p, char *data )
         p->syms = st_init_numtable();
     }
     id = p->syms->num_entries + 1;
-    st_insert( p->syms, id, (st_data_t)data );
+    st_insert( p->syms, (char*)id, (char*)(st_data_t)data );
     return id;
 }
 
@@ -192,12 +192,13 @@ int
 syck_lookup_sym( SyckParser *p, SYMID id, char **data )
 {
     if ( p->syms == NULL ) return 0;
-    return st_lookup( p->syms, id, (st_data_t *)data );
+    return st_lookup( p->syms, (char *)id, (char**)(st_data_t *)data );
 }
 
-int
-syck_st_free_nodes( char *key, SyckNode *n, char *arg )
+enum st_retval
+syck_st_free_nodes( char *key, char * proto_n, char *arg )
 {
+    SyckNode *n = (SyckNode *)proto_n;
     if ( n != (void *)1 ) syck_free_node( n );
     n = NULL;
     return ST_CONTINUE;

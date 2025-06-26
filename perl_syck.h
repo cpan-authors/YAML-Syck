@@ -828,7 +828,7 @@ yaml_syck_mark_emitter
     if (SvROK(sv)) {
         PERL_SYCK_MARK_EMITTER(e, SvRV(sv));
 #ifdef YAML_IS_JSON
-        st_insert(e->markers, (st_data_t)sv, 0);
+        st_insert(e->markers, (char*)(st_data_t)sv, 0);
         e->depth--;
 #endif
         return;
@@ -868,7 +868,7 @@ yaml_syck_mark_emitter
     }
 
 #ifdef YAML_IS_JSON
-    st_insert(e->markers, (st_data_t)sv, 0);
+    st_insert(e->markers, (char*)(st_data_t)sv, 0);
     --e->depth;
 #endif
 }
