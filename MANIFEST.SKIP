@@ -4,6 +4,7 @@
 ^RELEASE
 ^MYMETA
 ^Makefile$
+^cpanfile$
 ~$
 \.old$
 \.bak$
