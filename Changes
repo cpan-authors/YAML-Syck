@@ -1,3 +1,8 @@
+1.36 Oct 10 2025
+
+- Address memory corruption leading to 'str' value being set on empty keys
+  Thanks @timlegge
+
 1.35 Oct 9 2025
 
 - Address parsing error related to string detection on read for empty strings.
