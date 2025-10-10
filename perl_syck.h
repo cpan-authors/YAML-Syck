@@ -177,9 +177,6 @@ yaml_syck_parser_handler
                 }
             } else if (strEQ( id, "null" )) {
                 sv = newSV(0);
-            } else if (strnEQ( id, "str", 3 )) {
-                sv = newSVpvn(n->data.str->ptr, n->data.str->len);
-                CHECK_UTF8;
             } else if (strEQ( id, "bool#yes" )) {
                 sv = newSVsv(&PL_sv_yes);
             } else if (strEQ( id, "bool#no" )) {
