@@ -2825,7 +2825,7 @@ newline_len( char *ptr )
 }
 
 int 
-syckwrap()
+syckwrap(void)
 {
     return 1;
 }

@@ -195,11 +195,11 @@ syck_lookup_sym( SyckParser *p, SYMID id, char **data )
     return st_lookup( p->syms, id, (st_data_t *)data );
 }
 
-int
-syck_st_free_nodes( char *key, SyckNode *n, char *arg )
+enum st_retval
+syck_st_free_nodes( st_data_t key, st_data_t value, st_data_t arg )
 {
+    SyckNode *n = (SyckNode *)value;
     if ( n != (void *)1 ) syck_free_node( n );
-    n = NULL;
     return ST_CONTINUE;
 }
 

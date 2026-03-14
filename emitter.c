@@ -109,7 +109,7 @@ syck_base64dec( char *s, long len, long *out_len )
  * Allocate an emitter
  */
 SyckEmitter *
-syck_new_emitter()
+syck_new_emitter(void)
 {
     SyckEmitter *e;
     e = S_ALLOC( SyckEmitter );
