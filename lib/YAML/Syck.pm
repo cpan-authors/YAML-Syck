@@ -72,6 +72,7 @@ sub _is_glob {
     return 1 if ( ref($h) eq 'GLOB' );
     return 1 if ( ref( \$h ) eq 'GLOB' );
     return 1 if ( index( ref($h), 'IO::' ) == 0 );
+    return 1 if ( ref($h) && UNIVERSAL::isa($h, 'IO::Handle') );
 
     return;
 }
