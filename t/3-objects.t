@@ -46,7 +46,7 @@ my $rx = qr/123/;
 if (REGEX_CARET) {
     ok( 1, "Testing regexes with the >=5.13.5 caret syntax" );
     is( Dump($rx),                 "--- !!perl/regexp (?^:123)\n" );
-    is( Dump( Load( Dump($rx) ) ), "--- !!perl/regexp (?^:(?^:123))\n" );
+    is( Dump( Load( Dump($rx) ) ), "--- !!perl/regexp (?^:123)\n" );
 }
 else {
     ok( 1, "Testing regexes with the old <5.13.5 syntax" );
@@ -59,7 +59,7 @@ SKIP: {
     my $rx_obj = bless qr/123/i => 'Foo';
     if (REGEX_CARET) {
         is( Dump($rx_obj),                 "--- !!perl/regexp:Foo (?^i:123)\n" );
-        is( Dump( Load( Dump($rx_obj) ) ), "--- !!perl/regexp:Foo (?^:(?^i:123))\n" );
+        is( Dump( Load( Dump($rx_obj) ) ), "--- !!perl/regexp:Foo (?^i:123)\n" );
     }
     else {
         is( Dump($rx_obj),                 "--- !!perl/regexp:Foo (?i-xsm:123)\n" );
