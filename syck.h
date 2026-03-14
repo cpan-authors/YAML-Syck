@@ -88,7 +88,7 @@ extern "C" {
  * Node definitions
  */
 #ifndef ST_DATA_T_DEFINED
-typedef uintptr_t st_data_t;
+/* st_data_t is now defined in syck_st.h */
 #endif
 
 #define SYMID uintptr_t

@@ -143,10 +143,10 @@ syck_new_emitter()
     return e;
 }
 
-int
-syck_st_free_anchors( char *key, char *name, char *arg )
+enum st_retval
+syck_st_free_anchors( st_data_t key, st_data_t name, st_data_t arg )
 {
-    S_FREE( name );
+    free( (void *)name );
     return ST_CONTINUE;
 }
 
