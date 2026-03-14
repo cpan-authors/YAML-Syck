@@ -597,9 +597,7 @@ syck_scan_scalar( int req_width, char *cursor, long len )
     /* scan string */
     for ( i = 0; i < len; i++ ) {
 
-        if ( ! ( (unsigned char)cursor[i] == 0x9 ||
-                 (unsigned char)cursor[i] == 0xA ||
-                 (unsigned char)cursor[i] == 0xD ||
+        if ( ! ( (unsigned char)cursor[i] == 0xA ||
                ( (unsigned char)cursor[i] >= 0x20 &&
                  (unsigned char)cursor[i] <= 0x7E ) ||
                  (unsigned char)cursor[i] >= 0x80 )
@@ -716,7 +714,8 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
 
     /* Determine block style */
     if ( scan & SCAN_NONPRINT ) {
-        force_style = scalar_2quote;
+        if ( force_style != scalar_2quote_1 )
+            force_style = scalar_2quote;
     } else if ( force_style != scalar_1quote && force_style != scalar_2quote_1 && ( scan & SCAN_WHITEEDGE ) ) {
         force_style = scalar_2quote;
     } else if ( force_style != scalar_fold && ( scan & SCAN_INDENTED ) ) {
