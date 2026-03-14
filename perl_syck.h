@@ -59,7 +59,7 @@ static enum scalar_style yaml_quote_style = scalar_none;
 #else
 #  define IS_UTF8(x)    (FALSE)
 #endif
-#  define TYPE_IS_NULL(x) (x == NULL)
+#  define TYPE_IS_NULL(x) ((x == NULL) || strEQ( x, "str" ))
 #  define OBJOF(a)        (*tag ? tag : a)
 #  define PERL_SYCK_PARSER_HANDLER yaml_syck_parser_handler
 #  define PERL_SYCK_EMITTER_HANDLER yaml_syck_emitter_handler
