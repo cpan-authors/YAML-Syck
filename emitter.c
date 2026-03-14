@@ -598,8 +598,8 @@ syck_scan_scalar( int req_width, char *cursor, long len )
         flags |= SCAN_WHITEEDGE;
     }
 
-    /* opening doc sep */
-    if ( len >= 3 && strncmp( cursor, "---", 3 ) == 0 )
+    /* opening doc sep or doc end */
+    if ( len >= 3 && ( strncmp( cursor, "---", 3 ) == 0 || strncmp( cursor, "...", 3 ) == 0 ) )
         flags |= SCAN_DOCSEP;
 
     /* scan string */
@@ -614,7 +614,7 @@ syck_scan_scalar( int req_width, char *cursor, long len )
         }
         else if ( cursor[i] == '\n' ) {
             flags |= SCAN_NEWLINE;
-            if ( len - i >= 3 && strncmp( &cursor[i+1], "---", 3 ) == 0 )
+            if ( len - i >= 3 && ( strncmp( &cursor[i+1], "---", 3 ) == 0 || strncmp( &cursor[i+1], "...", 3 ) == 0 ) )
                 flags |= SCAN_DOCSEP;
             if ( cursor[i+1] == ' ' || cursor[i+1] == '\t' ) 
                 flags |= SCAN_INDENTED;
@@ -736,7 +736,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
         force_style = scalar_2quote;
     /* } else if ( force_style == scalar_fold && ( ! ( scan & SCAN_WIDE ) ) ) {
         force_style = scalar_literal; */
-    } else if ( force_style == scalar_plain && ( scan & SCAN_INDIC_S || scan & SCAN_INDIC_C ) ) {
+    } else if ( force_style == scalar_plain && ( scan & SCAN_INDIC_S || scan & SCAN_INDIC_C || scan & SCAN_DOCSEP ) ) {
         if ( scan & SCAN_NEWLINE ) {
             force_style = favor_style;
         } else {
