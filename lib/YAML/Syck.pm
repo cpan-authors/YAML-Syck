@@ -79,11 +79,21 @@ sub _is_glob {
 sub DumpFile {
     my $file = shift;
     if ( _is_glob($file) ) {
-        for (@_) {
-            my $err = YAML::Syck::DumpYAMLFile( $_, $file );
-            if ($err) {
-                $! = 0 + $err;
-                die "Error writing to filehandle $file: $!\n";
+        if ( tied(*$file) ) {
+            # Tied filehandles (IO::String, IO::Scalar, etc.) don't support
+            # C-level PerlIO_write. Fall back to Perl-level print.
+            for (@_) {
+                print $file YAML::Syck::Dump($_)
+                    or die "Error writing to filehandle $file: $!\n";
+            }
+        }
+        else {
+            for (@_) {
+                my $err = YAML::Syck::DumpYAMLFile( $_, $file );
+                if ($err) {
+                    $! = 0 + $err;
+                    die "Error writing to filehandle $file: $!\n";
+                }
             }
         }
     }
