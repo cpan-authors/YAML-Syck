@@ -507,6 +507,14 @@ void syck_emit_indent( SyckEmitter *e )
     int i;
     SyckLevel *lvl = syck_emitter_current_level( e );
     if ( e->bufpos == 0 && ( e->marker - e->buffer ) == 0 ) return;
+
+    /* Trim trailing spaces before emitting the newline to avoid
+     * trailing whitespace on lines like "--- " or "&anchor " when
+     * the content continues on the next line (GitHub #38). */
+    while ( e->marker > e->buffer && *(e->marker - 1) == ' ' ) {
+        e->marker--;
+    }
+
     if ( lvl->spaces >= 0 ) {
         char *spcs = S_ALLOC_N( char, lvl->spaces + 2 );
 
