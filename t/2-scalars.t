@@ -1,7 +1,7 @@
 use FindBin;
 BEGIN { push @INC, $FindBin::Bin }
 
-use TestYAML tests => 135;
+use TestYAML tests => 137;
 
 ok( YAML::Syck->VERSION, "YAML::Syck has a version and is loaded" );
 
@@ -288,18 +288,18 @@ is( Dump('00'),         "--- '00'\n", "00 Dump preserves by quoting" );
 is( Load("--- '00'\n"), "00",         "00 Load preserves by quoting" );
 
 # RT 54780 - double quoted loading style
-
-TODO: {
+{
     my $input = q{--- "<tag>content\
   \ string</tag>\n\
   <anothertag>other\
   \ content</anothertag>\n\
   \  \n<i>new</i>\n"};
-    my $expected = q{<tag>content string</tag>
-<anothertag>other content</anothertag>
-  
-<i>new</i>
-};
-    local $TODO = "not handling double quoted style right";
+    my $expected = "<tag>content string</tag>\n<anothertag>other content</anothertag>\n  \n<i>new</i>\n";
     is( Load($input), $expected, "RT 54780 - Wrong loading of YAML with double quoted style" );
+}
+
+# Backslash-space escape in double-quoted strings (YAML spec: \<space> = space)
+{
+    is( Load('--- "hello\\ world"'), "hello world", "backslash-space produces a space" );
+    is( Load('--- "a\\  b"'), "a  b", "backslash-space with trailing space preserves extra space" );
 }

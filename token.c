@@ -2112,10 +2112,17 @@ yy171:
 	default:	goto yy173;
 	}
 yy173:
+	if(yyaccept == 1){
+		/* backslash-space not followed by newline: emit a space (YAML escape \<space> = U+0020)
+		 * YYMARKER points to the space after the backslash; reposition YYCURSOR
+		 * just past it so any subsequent characters are re-parsed as content. */
+		QUOTECAT(qstr, qcapa, qidx, ' ');
+		YYCURSOR = YYMARKER + 1;
+		goto DoubleQuote2;
+	}
 	YYCURSOR = YYMARKER;
 	switch(yyaccept){
 	case 0:	goto yy163;
-	case 1:	goto yy165;
 	}
 yy174:
 	++YYCURSOR;
