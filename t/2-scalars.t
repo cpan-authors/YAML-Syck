@@ -1,7 +1,7 @@
 use FindBin;
 BEGIN { push @INC, $FindBin::Bin }
 
-use TestYAML tests => 137;
+use TestYAML tests => 147;
 
 ok( YAML::Syck->VERSION, "YAML::Syck has a version and is loaded" );
 
@@ -298,6 +298,17 @@ is( Load("--- '00'\n"), "00",         "00 Load preserves by quoting" );
     is( Load($input), $expected, "RT 54780 - Wrong loading of YAML with double quoted style" );
 }
 
+# Issue #51 - strings with control characters must be double-quoted
+is( Dump("foo\tbar"),       "--- \"foo\\tbar\"\n",       "Dump tab as double-quoted" );
+is( Dump("foo\rbar"),       "--- \"foo\\rbar\"\n",       "Dump CR as double-quoted" );
+is( Dump("foo\tbar\rbaz"),  "--- \"foo\\tbar\\rbaz\"\n", "Dump tab+CR as double-quoted" );
+is( Dump("foo\abar"),       "--- \"foo\\abar\"\n",       "Dump bell as double-quoted" );
+is( Dump("foo\x1bbar"),     "--- \"foo\\ebar\"\n",       "Dump escape as double-quoted" );
+roundtrip("foo\tbar");
+roundtrip("foo\rbar");
+roundtrip("foo\tbar\rbaz");
+roundtrip("foo\abar");
+roundtrip("foo\x1bbar");
 # Backslash-space escape in double-quoted strings (YAML spec: \<space> = space)
 {
     is( Load('--- "hello\\ world"'), "hello world", "backslash-space produces a space" );
