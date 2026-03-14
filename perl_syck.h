@@ -59,7 +59,7 @@ static enum scalar_style yaml_quote_style = scalar_none;
 #else
 #  define IS_UTF8(x)    (FALSE)
 #endif
-#  define TYPE_IS_NULL(x) (x == NULL)
+#  define TYPE_IS_NULL(x) ((x == NULL) || strEQ( x, "str" ))
 #  define OBJOF(a)        (*tag ? tag : a)
 #  define PERL_SYCK_PARSER_HANDLER yaml_syck_parser_handler
 #  define PERL_SYCK_EMITTER_HANDLER yaml_syck_emitter_handler
@@ -332,7 +332,8 @@ yaml_syck_parser_handler
 
             } else if (strnEQ( n->data.str->ptr, REF_LITERAL, 1+REF_LITERAL_LENGTH)) {
                 /* type tag in a scalar ref */
-                char *lang = strtok(id, "/:");
+                char *id_copy = savepv(id);
+                char *lang = strtok(id_copy, "/:");
                 char *type = strtok(NULL, "");
 
                 if (lang == NULL || (strEQ(lang, "perl"))) {
@@ -341,6 +342,7 @@ yaml_syck_parser_handler
                 else {
                     sv = newSVpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), 0);
                 }
+                Safefree(id_copy);
             } else if ( strEQ( id, "perl/scalar" ) || strnEQ( id, "perl/scalar:", 12 ) ) {
                 char *pkg = id + 12;
 
@@ -362,7 +364,8 @@ yaml_syck_parser_handler
             } else if ( (strEQ(id, "perl/regexp") || strnEQ( id, "perl/regexp:", 12 ) ) ) {
                 dSP;
                 SV *val = newSVpvn(n->data.str->ptr, n->data.str->len);
-                char *lang = strtok(id, "/:");
+                char *id_copy = savepv(id);
+                char *lang = strtok(id_copy, "/:");
                 char *type = strtok(NULL, "");
 
                 ENTER;
@@ -396,6 +399,7 @@ yaml_syck_parser_handler
 						sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
 					}
                 }
+                Safefree(id_copy);
 #endif /* PERL_LOADMOD_NOIMPORT */
 #endif /* !YAML_IS_JSON */
             } else {
@@ -427,7 +431,8 @@ yaml_syck_parser_handler
 
             if (id) {
                 /* bless it if necessary */
-                char *lang = strtok(id, "/:");
+                char *id_copy = savepv(id);
+                char *lang = strtok(id_copy, "/:");
                 char *type = strtok(NULL, "");
 
                 if ( type != NULL ) {
@@ -435,7 +440,7 @@ yaml_syck_parser_handler
                         /* !perl/array:Foo::Bar blesses into Foo::Bar */
                         type += 6;
                     }
-                    
+
                     /* FIXME deprecated - here compatibility with @Foo::Bar style blessing */
                     while ( *type == '@' ) { type++; }
                 }
@@ -451,6 +456,7 @@ yaml_syck_parser_handler
                 		sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
                 	}
                 }
+                Safefree(id_copy);
             }
 #endif
         break;
@@ -480,7 +486,8 @@ yaml_syck_parser_handler
 					}
 					else {
 						/* bless it if necessary */
-						char *lang = strtok(id, "/:");
+						char *id_copy = savepv(id);
+						char *lang = strtok(id_copy, "/:");
 						char *type = strtok(NULL, "");
 
 						if ( type != NULL && strnEQ(type, "ref:", 4)) {
@@ -496,6 +503,7 @@ yaml_syck_parser_handler
 							else {
 								sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
 							}
+						Safefree(id_copy);
 					}
                 }
             }
@@ -527,7 +535,8 @@ yaml_syck_parser_handler
 					}
 					else {
 						/* bless it if necessary */
-						char *lang = strtok(id, "/:");
+						char *id_copy = savepv(id);
+						char *lang = strtok(id_copy, "/:");
 						char *type = strtok(NULL, "");
 
 						if ( type != NULL && strnEQ(type, "regexp:", 7)) {
@@ -544,6 +553,7 @@ yaml_syck_parser_handler
 						else {
 							sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
 						}
+						Safefree(id_copy);
 					}
                 }
             }
@@ -579,7 +589,8 @@ yaml_syck_parser_handler
 #ifndef YAML_IS_JSON
                 if (id)  {
                     /* bless it if necessary */
-                    char *lang = strtok(id, "/:");
+                    char *id_copy = savepv(id);
+                    char *lang = strtok(id_copy, "/:");
                     char *type = strtok(NULL, "");
 
                     if ( type != NULL ) {
@@ -602,6 +613,7 @@ yaml_syck_parser_handler
 							sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
 						}
                     }
+                    Safefree(id_copy);
                 }
 #endif
             }
@@ -960,6 +972,15 @@ yaml_syck_emitter_handler
 #endif
             }
         }
+        {
+            /* Grow tag buffer if ref won't fit (prevents heap overflow) */
+            STRLEN need = strlen(tag) + strlen(ref) + 1;
+            if (need > bonus->tag_len) {
+                Renew(bonus->tag, need, char);
+                bonus->tag_len = need;
+                tag = bonus->tag;
+            }
+        }
         strcat(tag, ref);
     }
 #endif
@@ -1284,6 +1305,7 @@ DumpYAMLImpl
     emitter->anchor_format = "%d";
 
     New(801, bonus->tag, 512, char);
+    bonus->tag_len = 512;
     *(bonus->tag) = '\0';
     bonus->dump_code = SvTRUE(use_code) || SvTRUE(dump_code);
     bonus->implicit_binary = SvTRUE(implicit_binary);

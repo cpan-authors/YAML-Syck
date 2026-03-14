@@ -80,7 +80,8 @@ syck_base64dec( char *s, long len, long *out_len )
         }
     }
     while (s < send) {
-        while (s[0] == '\r' || s[0] == '\n') { s++; }
+        while (s < send && (s[0] == '\r' || s[0] == '\n')) { s++; }
+        if (s >= send) break;
         if ((a = b64_xtable[(int)s[0]]) == -1) break;
         if ((b = b64_xtable[(int)s[1]]) == -1) break;
         if ((c = b64_xtable[(int)s[2]]) == -1) break;
@@ -506,6 +507,14 @@ void syck_emit_indent( SyckEmitter *e )
     int i;
     SyckLevel *lvl = syck_emitter_current_level( e );
     if ( e->bufpos == 0 && ( e->marker - e->buffer ) == 0 ) return;
+
+    /* Trim trailing spaces before emitting the newline to avoid
+     * trailing whitespace on lines like "--- " or "&anchor " when
+     * the content continues on the next line (GitHub #38). */
+    while ( e->marker > e->buffer && *(e->marker - 1) == ' ' ) {
+        e->marker--;
+    }
+
     if ( lvl->spaces >= 0 ) {
         char *spcs = S_ALLOC_N( char, lvl->spaces + 2 );
 
