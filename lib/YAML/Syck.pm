@@ -40,7 +40,7 @@ use constant QR_MAP => {
 };
 
 sub __qr_helper {
-    if ( $_[0] =~ /\A  \(\?  ([ixsm]*)  (?:-  (?:[ixsm]*))?  : (.*) \)  \z/x ) {
+    if ( $_[0] =~ /\A  \(\?  \^?  ([ixsm]*)  (?:-  (?:[ixsm]*))?  : (.*) \)  \z/x ) {
         my $sub = QR_MAP()->{$1} || QR_MAP()->{''};
         &$sub($2);
     }
