@@ -637,7 +637,12 @@ yy47:
 	case 0x0A:	goto yy86;
 	case 0x0D:	goto yy90;
 	case ' ':	goto yy88;
-	default:	goto yy40;
+	default:
+		/* In flow context, comma is always a separator (GitHub #40) */
+		if (*YYTOKEN == ',' && (lvl->status == syck_lvl_iseq || lvl->status == syck_lvl_imap)) {
+			goto yy87;
+		}
+		goto yy40;
 	}
 yy48:
 	yyaccept = 1;
@@ -1654,7 +1659,13 @@ yy117:
 	case 0x0A:	goto yy130;
 	case 0x0D:	goto yy134;
 	case ' ':	goto yy132;
-	default:	goto yy115;
+	default:
+		/* In flow context, comma is always a separator (GitHub #40) */
+		if (plvl->status == syck_lvl_iseq || plvl->status == syck_lvl_imap) {
+			PLAIN_IS_INL();
+			RETURN_IMPLICIT();
+		}
+		goto yy115;
 	}
 yy118:
 	++YYCURSOR;
