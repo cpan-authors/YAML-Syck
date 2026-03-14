@@ -11,13 +11,13 @@ $YAML::Syck::LoadBlessed = 1;
 is( Dump(42),         "--- 42\n", 'Dump a simple number' );
 is( Load("--- 42\n"), 42,         "Load a simple number" );
 
-is( Dump( \42 ), "--- !!perl/ref \n=: 42\n", "A pointer to 42 dumps" );
+is( Dump( \42 ), "--- !!perl/ref\n=: 42\n", "A pointer to 42 dumps" );
 is( ${ Load("--- !!perl/ref \n=: 42\n") }, 42, "A pointer to 42 loads" );
 
 my $x;
 $x = \$x;
-is( Dump($x),                        "--- &1 !!perl/ref \n=: *1\n", "A Circular Reference Loads." );
-is( Dump( scalar Load( Dump($x) ) ), "--- &1 !!perl/ref \n=: *1\n", "A Circular Reference Round Trips." );
+is( Dump($x),                        "--- &1 !!perl/ref\n=: *1\n", "A Circular Reference Loads." );
+is( Dump( scalar Load( Dump($x) ) ), "--- &1 !!perl/ref\n=: *1\n", "A Circular Reference Round Trips." );
 
 $YAML::Syck::DumpCode = 0;
 is( Dump( sub { 42 } ), "--- !!perl/code: '{ \"DUMMY\" }'\n" );
@@ -101,8 +101,8 @@ is( Load("--- ''\n"), '' );
 my $h = { bar => [qw<baz troz>] };
 $h->{foo} = $h->{bar};
 is( Dump($h), << '.');
---- 
-bar: &1 
+---
+bar: &1
   - baz
   - troz
 foo: *1
@@ -111,11 +111,11 @@ foo: *1
 my $r;
 $r = \$r;
 is( Dump($r), << '.');
---- &1 !!perl/ref 
+--- &1 !!perl/ref
 =: *1
 .
 is( Dump( scalar Load( Dump($r) ) ), << '.');
---- &1 !!perl/ref 
+--- &1 !!perl/ref
 =: *1
 .
 
@@ -142,10 +142,10 @@ is( Load("--- -4294967296\n"), -4294967296 );
 
 # RT #18752
 my $recurse1 = << '.';
---- &1 
-Foo: 
+--- &1
+Foo:
   parent: *1
-Troz: 
+Troz:
   parent: *1
 .
 
@@ -153,32 +153,32 @@ is( Dump( scalar Load($recurse1) ), $recurse1, 'recurse 1' );
 
 # We wanna verify the circular ref but we can't garuntuee numbering after 5.18.0 changed the hash algorithm
 my $recurse2 = << '.';
---- &1 
-Bar: 
+--- &1
+Bar:
   parent: *1
-Baz: 
+Baz:
   parent: *1
-Foo: 
+Foo:
   parent: *1
-Troz: 
+Troz:
   parent: *1
-Zort: &2 
-  Poit: 
+Zort: &2
+  Poit:
     parent: *2
   parent: *1
 .
 
-my $recurse2want = qr{^---\s\&(\d+)\s*\n
-Bar:\s*\n
+my $recurse2want = qr{^---\s\&(\d+)\n
+Bar:\n
 \s\sparent:\s*\*\1\n
-Baz:\s*\n
+Baz:\n
 \s\sparent:\s*\*\1\n
-Foo:\s*\n
+Foo:\n
 \s\sparent:\s*\*\1\n
-Troz:\s*\n
+Troz:\n
 \s\sparent:\s*\*\1\n
-Zort:\s&(?!\1)(\d+)\s*\n
-\s\sPoit:\s\n
+Zort:\s&(?!\1)(\d+)\n
+\s\sPoit:\n
 \s\s\s\sparent:\s+\*\2\n
 \s\sparent:\s+\*\1
 }xms;
@@ -254,14 +254,14 @@ is( Dump('nULL'), "--- nULL\n" );    # invalid case
 
 # RT 52432 - '... X'
 my $bad_hash        = { '... X' => '' };
-my $bad_hash_should = "--- \n... X: ''\n";
+my $bad_hash_should = "---\n... X: ''\n";
 TODO: {
     local $TODO;
     $TODO = "roundtrip is breaking for this right now: '$bad_hash_should'";
     roundtrip($bad_hash);
 }
 
-is( Dump( { foo => "`bar" } ), qq{--- \nfoo: "`bar"\n}, 'RT 47944 - back quote is a reserved character' );
+is( Dump( { foo => "`bar" } ), qq{---\nfoo: "`bar"\n}, 'RT 47944 - back quote is a reserved character' );
 
 # quoted number corner cases:
 foreach (qw/1 2 3 1.0 1.0000 1.00004 2.2 3.7 42.0 0.123 0.0042 0...02 98765432109123 987654321091234 -98765432109123/) {
