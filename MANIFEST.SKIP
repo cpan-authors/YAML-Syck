@@ -22,4 +22,5 @@
 ^blib/
 ^pm_to_blib$
 ^YAML-Syck-\d\.\d+/
+^CLAUDE\.md$
 ^.perltidyrc
