@@ -896,6 +896,7 @@ yaml_syck_emitter_handler
     char dump_code             = bonus->dump_code;
     char implicit_binary       = bonus->implicit_binary;
     char* ref                  = NULL;
+    char* ref_orig             = NULL;
 #endif
 
 #define OBJECT_TAG     "tag:!perl:"
@@ -909,6 +910,7 @@ yaml_syck_emitter_handler
     /* Handle blessing into the right class */
     if (sv_isobject(sv)) {
         ref = savepv(sv_reftype(SvRV(sv), TRUE));
+        ref_orig = ref;
         *tag = '\0';
         strcat(tag, OBJECT_TAG);
 
@@ -1003,9 +1005,12 @@ yaml_syck_emitter_handler
             }
 #endif
             default: {
+                SV *ref_sv;
                 syck_emit_map(e, OBJOF("tag:!perl:ref"), MAP_NONE);
                 *tag = '\0';
-                syck_emit_item( e, (st_data_t)newSVpvn_share(REF_LITERAL, REF_LITERAL_LENGTH, 0) );
+                ref_sv = newSVpvn_share(REF_LITERAL, REF_LITERAL_LENGTH, 0);
+                syck_emit_item( e, (st_data_t)ref_sv );
+                SvREFCNT_dec(ref_sv);
                 syck_emit_item( e, (st_data_t)SvRV(sv) );
                 syck_emit_end(e);
             }
@@ -1244,6 +1249,11 @@ yaml_syck_emitter_handler
     }
 /* cleanup: */
     *tag = '\0';
+#ifndef YAML_IS_JSON
+    if (ref_orig != NULL) {
+        Safefree(ref_orig);
+    }
+#endif
 }
 
 void
