@@ -1,5 +1,12 @@
-1.37 Mar 15 2026
+1.37_01 Mar 16 2026
 
+- Fix: apply JSON postprocessing to JSON::Syck::DumpFile output (GH #104)
+- Fix: add tied-filehandle fallback to JSON::Syck::DumpFile (GH #98)
+- Fix: handle JSON escape sequences in SingleQuote mode Load (GH #99)
+- Fix: correct $SortKeys POD default from false to true (GH #100)
+- Fix: correct copy-paste error in Makefile.PL clean target (GH #101)
+- Fix: correct POD documentation errors (GH #103)
+- CI: add disttest job to validate MANIFEST completeness
 - Silence macOS compiler warnings (GH #92)
 - Fix DumpFile with tied filehandles (IO::String, IO::Scalar) (GH #22)
 - Add C23-compatible function prototypes for GCC 15 compatibility
