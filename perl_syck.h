@@ -653,7 +653,14 @@ static char* perl_json_preprocess(char *s) {
         *pos++ = ch;
         if (in_quote) {
             in_quote = !in_quote;
-            if (ch == '\'') {
+            if (ch == '\'' && json_quote_char == '\'') {
+                /* JSON single-quote mode: \' is an escaped quote.
+                 * Since we convert delimiters to " for YAML double-quote
+                 * parsing, a literal ' needs no backslash inside "..." */
+                pos -= 2;
+                *pos++ = '\'';
+            }
+            else if (ch == '\'') {
                 *(pos - 2) = '\'';
             }
         }
@@ -665,11 +672,28 @@ static char* perl_json_preprocess(char *s) {
                 case ':':  { *pos++ = ' '; break; }
                 case ',':  { *pos++ = ' '; break; }
                 case '"':  { in_string = '"'; break; }
-                case '\'': { in_string = '\''; break; }
+                case '\'': {
+                    in_string = '\'';
+                    if (json_quote_char == '\'') {
+                        /* Convert ' delimiter to " so YAML double-quote
+                         * parser handles escape sequences (\b, \n, etc.) */
+                        *(pos - 1) = '"';
+                    }
+                    break;
+                }
             }
         }
         else if (ch == in_string) {
             in_string = '\0';
+            if (ch == '\'' && json_quote_char == '\'') {
+                *(pos - 1) = '"';
+            }
+        }
+        else if (ch == '"' && json_quote_char == '\'' && in_string == '\'') {
+            /* Unescaped " inside a single-quoted JSON string needs escaping
+             * because we converted the delimiters to " for YAML parsing */
+            *(pos - 1) = '\\';
+            *pos++ = '"';
         }
     }
 
