@@ -6,7 +6,7 @@ use Test::More tests => 12;
 
 SKIP: {
     eval { require Devel::Leak; require 5.8.9; 1; }
-      or skip( "Devel::Leak not installed or perl too old", 11 );
+      or skip( "Devel::Leak not installed or perl too old", 12 );
 
     # check if arrays leak
 
