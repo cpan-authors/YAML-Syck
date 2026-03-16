@@ -31,7 +31,8 @@
 # include <stdint.h>
 #elif defined(I_INTTYPES)
 # include <inttypes.h>
-#else
+#elif !defined(SYCK_UINTPTR_DEFINED)
+# define SYCK_UINTPTR_DEFINED
   typedef unsigned long uintptr_t;
 #endif
 #include <stdio.h>
