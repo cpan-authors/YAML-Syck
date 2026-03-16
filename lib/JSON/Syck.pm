@@ -14,10 +14,18 @@ our @ISA       = qw/Exporter/;
 sub DumpFile {
     my $file = shift;
     if ( YAML::Syck::_is_glob($file) ) {
-        my $err = YAML::Syck::DumpJSONFile( $_[0], $file );
-        if ($err) {
-            $! = 0 + $err;
-            die "Error writing to filehandle $file: $!\n";
+        if ( tied(*$file) ) {
+            # Tied filehandles (IO::String, IO::Scalar, etc.) don't support
+            # C-level PerlIO_write. Fall back to Perl-level print.
+            print $file YAML::Syck::DumpJSON( $_[0] )
+                or die "Error writing to filehandle $file: $!\n";
+        }
+        else {
+            my $err = YAML::Syck::DumpJSONFile( $_[0], $file );
+            if ($err) {
+                $! = 0 + $err;
+                die "Error writing to filehandle $file: $!\n";
+            }
         }
     }
     else {
