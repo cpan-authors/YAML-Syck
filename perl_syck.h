@@ -871,6 +871,8 @@ yaml_syck_mark_emitter
             }
             break;
         }
+        default:
+            break;
     }
 
 #ifdef YAML_IS_JSON
@@ -967,6 +969,8 @@ yaml_syck_emitter_handler
                 }
 #endif
             }
+            default:
+                break;
         }
         {
             /* Grow tag buffer if ref won't fit (prevents heap overflow) */
