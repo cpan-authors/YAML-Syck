@@ -79,10 +79,13 @@ WriteMakefile(
 # yacc/bison is only needed when gram.y changes.
 sub MY::postamble {
     return <<'MAKE';
-# Clear .y from the suffix list so make never auto-invokes yacc/bison.
-# gram.c and gram.h are pre-generated; only regenerate manually.
+# Cancel make's built-in implicit rules for .y -> .c so it never
+# auto-invokes yacc/bison.  gram.c and gram.h are pre-generated.
+# 1) Cancel the suffix rule by clearing .y from the suffix list
 .SUFFIXES:
 .SUFFIXES: .c .xs .o
+# 2) Cancel GNU make's built-in pattern rule (%.c: %.y)
+%.c: %.y
 
 # Regenerate gram.c and gram.h from gram.y (requires bison)
 regen-grammar: gram.y
