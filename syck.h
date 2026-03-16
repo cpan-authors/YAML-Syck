@@ -348,6 +348,8 @@ struct _syck_emitter {
     int lvl_capa;
     int max_depth;
     int depth;
+    /* JSON mode: use only JSON-valid escape sequences (\uXXXX not \xHH) */
+    int json_mode;
     /* Pointer for extension's use */
     void *bonus;
 };

@@ -1276,6 +1276,7 @@ DumpYAMLImpl
     json_quote_style     = (SvTRUE(singlequote) ? scalar_2quote_1 : scalar_2quote );
     emitter->indent      = PERL_SYCK_INDENT_LEVEL;
     emitter->max_depth   = SvIOK(max_depth) ? SvIV(max_depth) : json_max_depth;
+    emitter->json_mode   = 1;
 #else
     SV *singlequote      = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
     yaml_quote_style     = (SvTRUE(singlequote) ? scalar_1quote : scalar_none);

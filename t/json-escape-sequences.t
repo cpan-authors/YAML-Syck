@@ -6,8 +6,8 @@ BEGIN { push @INC, $FindBin::Bin }
 use Test::More;
 use JSON::Syck;
 
-# Test that JSON::Syck::Load correctly decodes JSON escape sequences.
-# This covers issue #30: JSON::Syck does not properly escape/unescape JSON strings.
+# Test that JSON::Syck correctly handles JSON escape sequences.
+# This covers issue #21 and issue #30.
 
 my @load_tests = (
     # [ description, json_input, expected_bytes ]
@@ -47,10 +47,53 @@ my @load_tests = (
 
 );
 
-plan tests => scalar @load_tests;
+# Dump tests: verify JSON::Syck::Dump produces only valid JSON escape sequences
+# JSON allows: \" \\ \/ \b \f \n \r \t \uXXXX — nothing else (no \xHH, \0, \a, \v, \e)
+my @dump_tests = (
+    # [ description, perl_value, expected_json ]
+    [ 'dump tab',              "hello\tworld",    '"hello\tworld"' ],
+    [ 'dump newline',          "hello\nworld",    '"hello\nworld"' ],
+    [ 'dump carriage return',  "hello\rworld",    '"hello\rworld"' ],
+    [ 'dump backspace',        "hello\bworld",    '"hello\bworld"' ],
+    [ 'dump form feed',        "hello\fworld",    '"hello\fworld"' ],
+    [ 'dump backslash',        'hello\\world',    '"hello\\\\world"' ],
+    [ 'dump double quote',     'hello"world',     '"hello\\"world"' ],
+    [ 'dump null byte',        "hello\x00world",  '"hello\u0000world"' ],
+    [ 'dump SOH',              "hello\x01world",  '"hello\u0001world"' ],
+    [ 'dump control char 0x1f', "hello\x1fworld", '"hello\u001fworld"' ],
+    [ 'dump bell',             "hello\x07world",  '"hello\u0007world"' ],
+    [ 'dump vertical tab',    "hello\x0bworld",   '"hello\u000bworld"' ],
+    [ 'dump escape char',     "hello\x1bworld",   '"hello\u001bworld"' ],
+);
+
+# Roundtrip tests: Load(Dump(x)) == x
+my @roundtrip_tests = (
+    [ 'roundtrip tab',         "line1\tline2" ],
+    [ 'roundtrip newline',     "line1\nline2" ],
+    [ 'roundtrip backspace',   "line1\bline2" ],
+    [ 'roundtrip form feed',   "line1\fline2" ],
+    [ 'roundtrip CR',          "line1\rline2" ],
+    [ 'roundtrip null byte',   "line1\x00line2" ],
+    [ 'roundtrip mixed',       "tab\there\nnew\r\n" ],
+    [ 'roundtrip control chars', "\x01\x02\x1f" ],
+);
+
+plan tests => scalar(@load_tests) + scalar(@dump_tests) + scalar(@roundtrip_tests);
 
 for my $test (@load_tests) {
     my ($desc, $input, $expected) = @$test;
     my $got = JSON::Syck::Load($input);
     is $got, $expected, "Load: $desc";
+}
+
+for my $test (@dump_tests) {
+    my ($desc, $value, $expected) = @$test;
+    my $got = JSON::Syck::Dump($value);
+    is $got, $expected, "Dump: $desc";
+}
+
+for my $test (@roundtrip_tests) {
+    my ($desc, $value) = @$test;
+    my $got = JSON::Syck::Load(JSON::Syck::Dump($value));
+    is $got, $value, "Roundtrip: $desc";
 }

@@ -52,7 +52,7 @@ my @tests = (
     { TEST => '"\n"',     TODO => "backslashed char not working yet" },
     { TEST => '"\r"',     TODO => "backslashed char not working yet" },
     { TEST => '"\t"',     TODO => "backslashed \\t not working yet" },
-    { TEST => '"\u0001"', TODO => "backslashed \\u not working yet" },
+    { TEST => '"\u0001"', TODO => "single-quote mode cannot roundtrip \\uXXXX" },
 );
 
 plan tests => scalar @tests * ( 2 + $HAS_JSON ) * 2;
@@ -67,7 +67,7 @@ TODO: {
 
                 local $TODO;
                 if ( ref $test eq 'HASH' ) {
-                    if ($single_quote or substr($test->{TEST},2,1) =~ m|[u/]|) {
+                    if ($single_quote or substr($test->{TEST},2,1) =~ m|/|) {
                         $TODO = $test->{TODO};
                     }
                     $test = $test->{TEST};
