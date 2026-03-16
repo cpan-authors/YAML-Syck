@@ -859,18 +859,12 @@ yaml_syck_mark_emitter
             break;
         }
         case SVt_PVHV: {
-            I32 len, i;
-#ifdef HAS_RESTRICTED_HASHES
-            len = HvTOTALKEYS((HV*)sv);
-#else
-            len = HvKEYS((HV*)sv);
-#endif
+            HE *he;
             hv_iterinit((HV*)sv);
-            for (i = 0; i < len; i++) {
 #ifdef HV_ITERNEXT_WANTPLACEHOLDERS
-                HE *he = hv_iternext_flags((HV*)sv, HV_ITERNEXT_WANTPLACEHOLDERS);
+            while ((he = hv_iternext_flags((HV*)sv, HV_ITERNEXT_WANTPLACEHOLDERS)) != NULL) {
 #else
-                HE *he = hv_iternext((HV*)sv);
+            while ((he = hv_iternext((HV*)sv)) != NULL) {
 #endif
                 SV *val = hv_iterval((HV*)sv, he);
                 PERL_SYCK_MARK_EMITTER( e, val );
@@ -1117,47 +1111,39 @@ yaml_syck_emitter_handler
             }
             case SVt_PVHV: { /* hash */
                 HV *hv = (HV*)sv;
+                HE *he;
                 syck_emit_map(e, OBJOF("hash"), MAP_NONE);
                 e->indent = PERL_SYCK_INDENT_LEVEL;
 
                 *tag = '\0';
-#ifdef HAS_RESTRICTED_HASHES
-                len = HvTOTALKEYS((HV*)sv);
-#else
-                len = HvKEYS((HV*)sv);
-#endif
                 hv_iterinit((HV*)sv);
 
                 if (e->sort_keys) {
                     AV *av = (AV*)sv_2mortal((SV*)newAV());
-                    for (i = 0; i < len; i++) {
-#ifdef HAS_RESTRICTED_HASHES
-                        HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
+                    while ((he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS)) != NULL) {
 #else
-                        HE *he = hv_iternext(hv);
+                    while ((he = hv_iternext(hv)) != NULL) {
 #endif
                         SV *key = hv_iterkeysv(he);
                         av_store(av, AvFILLp(av)+1, key); /* av_push(), really */
                     }
+                    len = av_len(av) + 1;
                     STORE_HASH_SORT;
                     for (i = 0; i < len; i++) {
-#ifdef HAS_RESTRICTED_HASHES
-                        int placeholders = (int)HvPLACEHOLDERS_get(hv);
-#endif
                         SV *key = av_shift(av);
                         HE *he  = hv_fetch_ent(hv, key, 0, 0);
-                        SV *val = HeVAL(he);
+                        SV *val = he ? HeVAL(he) : &PL_sv_undef;
                         if (val == NULL) { val = &PL_sv_undef; }
                         syck_emit_item( e, (st_data_t)key );
                         syck_emit_item( e, (st_data_t)val );
                     }
                 }
                 else {
-                    for (i = 0; i < len; i++) {
 #ifdef HV_ITERNEXT_WANTPLACEHOLDERS
-                        HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+                    while ((he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS)) != NULL) {
 #else
-                        HE *he = hv_iternext(hv);
+                    while ((he = hv_iternext(hv)) != NULL) {
 #endif
                         SV *key = hv_iterkeysv(he);
                         SV *val = hv_iterval(hv, he);
