@@ -333,8 +333,6 @@ C<local $YAML::Syck::ImplicitUnicode = 1>).
 
 Dumping Glob/IO values do not work yet.
 
-Dumping of Tied variables is unsupported.
-
 Dumping into tied (or other magic variables) with C<DumpInto> might not work
 properly in all cases.
 
