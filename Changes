@@ -5,6 +5,7 @@
 
   [Fixes]
   - Fix heap buffer overflow in the YAML emitter - CVE-2026-4177 (GH #67)
+  - Fix parsing of non-specific tag '!' before block scalars (GH #27)
   - Fix DumpFile with tied filehandles (IO::String, IO::Scalar) (GH #22)
   - Fix _is_glob to recognize IO::Handle subclasses (GH #23)
   - Fix memory leak when dumping filehandles (RT#41199, GH #42)
