@@ -510,6 +510,7 @@ int syck_str_is_unquotable_integer(char* str, long len) {
     if(len > 9) return 0; /* Ints larger than 9 digits (32bit) might not portable. Force a string. */
 
     if(str[0] == '0' && len == 1) return 1; /* 0 is unquoted. */
+    if(str[0] == '+') return 0; /* +N must be quoted or the '+' is lost on roundtrip. */
     if(str[0] == '-') {str++; len --;} /* supress the leading '-' sign if detected for testing purposes only. */
     if(str[0]  == '0') return 0; /* Octals need to be quoted or you lose data converting them to an integer. This also accidentally blocks -0 which probably needs to be quoted. */
 
