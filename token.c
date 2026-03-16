@@ -241,7 +241,7 @@ int is_newline( char *ptr );
 int newline_len( char *ptr );
 int sycklex_yaml_utf8( YYSTYPE *, SyckParser * );
 int sycklex_bytecode_utf8( YYSTYPE *, SyckParser * );
-int syckwrap();
+int syckwrap(void);
 
 /*
  * My own re-entrant sycklex() using re2c.
@@ -2909,7 +2909,7 @@ newline_len( char *ptr )
 }
 
 int 
-syckwrap()
+syckwrap(void)
 {
     return 1;
 }
