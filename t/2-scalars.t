@@ -274,7 +274,7 @@ foreach ( 1, 2, 3, 0, -1, -2, -3 ) {
     is( Dump($_), "--- $_\n", "Dumped version of file is unquoted" );
 }
 
-is( Dump('0x10'),         "--- 0x10\n", "hex Dump preserves as string" );
+is( Dump('0x10'),         "--- '0x10'\n", "hex Dump preserves by quoting" );
 is( Load("--- '0x10'\n"), "0x10",       "hex Load preserves as string" );
 
 is( Dump('080'),         "--- '080'\n", "oct Dump preserves by quoting" );
