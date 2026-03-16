@@ -115,20 +115,23 @@ sub DumpFile {
 
 sub LoadFile {
     my $file = shift;
+    my $contents;
     if ( _is_glob($file) ) {
-        Load(
-            do { local $/; <$file> }
-        );
+        $contents = do { local $/; <$file> };
     }
     else {
         if ( !-e $file || -z $file ) {
             die("'$file' is empty or non-existent");
         }
         open( my $fh, '<', $file ) or die "Cannot read from $file: $!";
-        Load(
-            do { local $/; <$fh> }
-        );
+        $contents = do { local $/; <$fh> };
     }
+    # Untaint file contents - parsed YAML data should not carry the taint
+    # flag from the filehandle. This matches the behavior of YAML.pm and
+    # YAML::Tiny, which use regex-based parsing that naturally strips taint.
+    # (GH #29 / rt.cpan.org #35522)
+    ($contents) = $contents =~ /(.*)/s if defined $contents;
+    Load($contents);
 }
 
 sub LoadBytes {
