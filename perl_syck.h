@@ -871,6 +871,8 @@ yaml_syck_mark_emitter
             }
             break;
         }
+        default:
+            break;
     }
 
 #ifdef YAML_IS_JSON
