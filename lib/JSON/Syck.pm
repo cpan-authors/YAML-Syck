@@ -8,8 +8,24 @@ our $VERSION   = '1.36';
 our @EXPORT_OK = qw( Load Dump LoadFile DumpFile DumpInto );
 our @ISA       = qw/Exporter/;
 
-*Load = \&YAML::Syck::LoadJSON;
-*Dump = \&YAML::Syck::DumpJSON;
+our $LoadJsonClass;
+our $DumpJsonClass;
+
+sub Load {
+    my $result = YAML::Syck::LoadJSON($_[0]);
+    if ($LoadJsonClass) {
+        $result = _walk_load($result);
+    }
+    return $result;
+}
+
+sub Dump {
+    my ($data) = @_;
+    if ($DumpJsonClass) {
+        $data = _walk_dump($data);
+    }
+    return YAML::Syck::DumpJSON($data);
+}
 
 sub DumpFile {
     my $file = shift;
@@ -56,6 +72,45 @@ sub DumpInto {
     ( ref $bufref ) or die "DumpInto not given reference to output buffer\n";
     YAML::Syck::DumpJSONInto( $_[0], $bufref );
     1;
+}
+
+sub _walk_load {
+    my ($node) = @_;
+    if (ref $node eq 'HASH') {
+        # Recurse into values first (depth-first)
+        for my $key (keys %$node) {
+            $node->{$key} = _walk_load($node->{$key});
+        }
+        # Apply __jsonclass__ callback if present
+        if (exists $node->{'__jsonclass__'}) {
+            $node = $LoadJsonClass->($node);
+        }
+    }
+    elsif (ref $node eq 'ARRAY') {
+        for my $i (0 .. $#$node) {
+            $node->[$i] = _walk_load($node->[$i]);
+        }
+    }
+    return $node;
+}
+
+sub _walk_dump {
+    my ($node) = @_;
+    if (ref $node && ref $node ne 'HASH' && ref $node ne 'ARRAY') {
+        # Blessed object (or other ref type) - call the callback
+        return $DumpJsonClass->($node);
+    }
+    elsif (ref $node eq 'HASH') {
+        my %out;
+        for my $key (keys %$node) {
+            $out{$key} = _walk_dump($node->{$key});
+        }
+        return \%out;
+    }
+    elsif (ref $node eq 'ARRAY') {
+        return [ map { _walk_dump($_) } @$node ];
+    }
+    return $node;
 }
 
 $JSON::Syck::ImplicitTyping  = 1;
@@ -174,6 +229,48 @@ convenient to use single quotes.
 
 Set C<$JSON::Syck::SingleQuote> to 1 will make both C<Dump> and C<Load> expect
 single-quoted string literals.
+
+=head1 JSON-RPC CLASS HINTING
+
+JSON::Syck supports the C<__jsonclass__> convention from the JSON-RPC
+specification for serializing and deserializing blessed Perl objects through
+JSON.  This feature is B<disabled by default> and requires setting callback
+functions.
+
+=head2 Loading (JSON to Perl objects)
+
+Set C<$JSON::Syck::LoadJsonClass> to a code reference.  During C<Load>, any
+hash containing a C<__jsonclass__> key will be passed to your callback.  The
+callback receives the hash reference and should return the constructed object.
+
+    $JSON::Syck::LoadJsonClass = sub {
+        my ($hash) = @_;
+        my $class_info = delete $hash->{'__jsonclass__'};
+        my ($class, $params) = @$class_info;
+        return bless $hash, $class;
+    };
+
+    my $obj = JSON::Syck::Load('{"__jsonclass__":["My::Class"],"color":"red"}');
+    # $obj is now a My::Class instance
+
+The data structure is walked depth-first, so nested objects are processed
+from the inside out.
+
+=head2 Dumping (Perl objects to JSON)
+
+Set C<$JSON::Syck::DumpJsonClass> to a code reference.  During C<Dump>, any
+blessed reference will be passed to your callback.  The callback receives the
+object and should return a plain hash reference (with the C<__jsonclass__> key
+set appropriately).
+
+    $JSON::Syck::DumpJsonClass = sub {
+        my ($obj) = @_;
+        my $class = ref $obj;
+        return { '__jsonclass__' => [$class], %$obj };
+    };
+
+    my $json = JSON::Syck::Dump(bless { color => "red" }, "My::Class");
+    # produces: {"__jsonclass__":["My::Class"],"color":"red"}
 
 =head1 BUGS
 
