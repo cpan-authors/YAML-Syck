@@ -11,7 +11,7 @@ unless ( -w $FindBin::RealBin ) {
     exit;
 }
 
-plan tests => 8;
+plan tests => 9;
 
 *::DumpFile = *YAML::Syck::DumpFile;
 
@@ -77,6 +77,22 @@ SKIP: {
     DumpFile( \*H, $scalar );
     close(H);
     file_contents_is( 'dumpfile.yml', $expected_yaml, 'DumpFile works with glob refs' );
+    unlink 'dumpfile.yml' or die $!;
+}
+
+# dump to IO::Handle subclass (GH #23)
+{
+    package MyDumpIO;
+    use parent 'IO::Handle';
+    1;
+
+    package main;
+    require IO::File;
+    my $h = IO::File->new('>dumpfile.yml');
+    bless $h, 'MyDumpIO';    # re-bless into custom subclass
+    DumpFile( $h, $scalar );
+    close $h;
+    file_contents_is( 'dumpfile.yml', $expected_yaml, 'DumpFile works with IO::Handle subclass (GH #23)' );
     unlink 'dumpfile.yml' or die $!;
 }
 
