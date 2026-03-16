@@ -232,7 +232,7 @@ leading C<---\n> marker.
 
 =head2 $YAML::Syck::SortKeys
 
-Defaults to false.  Setting this to a true value will make C<Dump> sort
+Defaults to true (1).  Setting this to a true value will make C<Dump> sort
 hash keys.
 
 =head2 $YAML::Syck::SingleQuote
