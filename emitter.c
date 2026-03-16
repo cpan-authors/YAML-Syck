@@ -1265,7 +1265,10 @@ void syck_emit_end( SyckEmitter *e )
     {
         case syck_lvl_seq:
             if ( lvl->ncount == 0 ) {
-                syck_emitter_write( e, "[]\n", 3 );
+                syck_emitter_write( e, "[]", 2 );
+                if ( parent->status == syck_lvl_mapx ) {
+                    syck_emitter_write( e, "\n", 1 );
+                }
             } else if ( parent->status == syck_lvl_mapx ) {
                 syck_emitter_write( e, "\n", 1 );
             }
@@ -1280,7 +1283,10 @@ void syck_emit_end( SyckEmitter *e )
 
         case syck_lvl_map:
             if ( lvl->ncount == 0 ) {
-                syck_emitter_write( e, "{}\n", 3 );
+                syck_emitter_write( e, "{}", 2 );
+                if ( parent->status == syck_lvl_mapx ) {
+                    syck_emitter_write( e, "\n", 1 );
+                }
             } else if ( lvl->ncount % 2 == 1 ) {
                 syck_emitter_write( e, ":", 1 );
             } else if ( parent->status == syck_lvl_mapx ) {

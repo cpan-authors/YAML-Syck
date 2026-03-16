@@ -13,7 +13,7 @@ ok( YAML::Syck->VERSION );
 # These tests assume object creation.
 $YAML::Syck::LoadBlessed = 1;
 
-is( Dump( bless( {}, 'foo' ) ), "--- !!perl/hash:foo {}\n\n" );
+is( Dump( bless( {}, 'foo' ) ), "--- !!perl/hash:foo {}\n" );
 
 sub ref_ok {
     my $x = Load("--- $_[0] {a: b}\n");
