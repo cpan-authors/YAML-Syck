@@ -27,7 +27,13 @@
 #endif
 
 #include <stddef.h>
-#include <stdint.h>
+#ifdef I_STDINT
+# include <stdint.h>
+#elif defined(I_INTTYPES)
+# include <inttypes.h>
+#else
+  typedef unsigned long uintptr_t;
+#endif
 #include <stdio.h>
 #include <ctype.h>
 #ifdef HAVE_ST_H
