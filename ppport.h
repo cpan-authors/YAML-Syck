@@ -12820,18 +12820,19 @@ typedef NVTYPE NV;
 #  endif
 #endif
 
-#undef STMT_START
-#undef STMT_END
-#if defined(VOIDFLAGS) && defined(PERL_USE_GCC_BRACE_GROUPS)
-#  define STMT_START    (void)( /* gcc supports ``({ STATEMENTS; })'' */
-#  define STMT_END      )
-#else
-#  if defined(VOIDFLAGS) && (VOIDFLAGS) && (defined(sun) || defined(__sun__)) && !defined(__GNUC__)
-#    define STMT_START  if (1)
-#    define STMT_END    else (void)0
+#ifndef STMT_START
+#  undef STMT_END
+#  if defined(VOIDFLAGS) && defined(PERL_USE_GCC_BRACE_GROUPS)
+#    define STMT_START    (void)( /* gcc supports ``({ STATEMENTS; })'' */
+#    define STMT_END      )
 #  else
-#    define STMT_START  do
-#    define STMT_END    while (0)
+#    if defined(VOIDFLAGS) && (VOIDFLAGS) && (defined(sun) || defined(__sun__)) && !defined(__GNUC__)
+#      define STMT_START  if (1)
+#      define STMT_END    else (void)0
+#    else
+#      define STMT_START  do
+#      define STMT_END    while (0)
+#    endif
 #  endif
 #endif
 #ifndef boolSV

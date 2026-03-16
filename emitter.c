@@ -861,7 +861,7 @@ syck_emitter_escape( SyckEmitter *e, unsigned char *src, long len )
         }
         else
         {
-            syck_emitter_write( e, src + i, 1 );
+            syck_emitter_write( e, (const char *)src + i, 1 );
             if( '\\' == src[i] )
                 syck_emitter_write( e, "\\", 1 );
         }
