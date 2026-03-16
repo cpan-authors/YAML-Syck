@@ -11,7 +11,10 @@ use Test::More tests => 4;
 use YAML::Syck;
 
 # Test $. (current line number) - the original bug report
-{
+# Skipped on perl < 5.18 where mg_get for $. is a core perl issue
+SKIP: {
+    skip '$. magic not reliable before perl 5.18', 2 if $] < 5.018;
+
     open my $fh, "<", $0 or die "Cannot open $0: $!";
     <$fh> for 1..3;
 
