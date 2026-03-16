@@ -1,5 +1,6 @@
 1.37 Mar 15 2026
 
+- Silence macOS compiler warnings (GH #92)
 - Fix DumpFile with tied filehandles (IO::String, IO::Scalar) (GH #22)
 - Add C23-compatible function prototypes for GCC 15 compatibility
 - Fix JSON::Syck::Dump to use JSON-valid \uXXXX escapes in output (GH #21)
