@@ -9,7 +9,7 @@
 - CI: add disttest job to validate MANIFEST completeness
 - Silence macOS compiler warnings (GH #92)
 - Fix DumpFile with tied filehandles (IO::String, IO::Scalar) (GH #22)
-- Add C23-compatible function prototypes for GCC 15 compatibility
+- Add C23-compatible function prototypes for GCC 15 compatibility (GH #113)
 - Fix JSON::Syck::Dump to use JSON-valid \uXXXX escapes in output (GH #21)
 - Add LoadBytes, LoadUTF8, DumpBytes, DumpUTF8 functions (GH #51)
 - Fix growing !!perl/regexp objects in roundtrips (GH #43)
