@@ -74,4 +74,18 @@ WriteMakefile(
     : (),
 );
 
+# Suppress make's built-in .y -> .c implicit rule.
+# gram.c and gram.h are pre-generated and checked in;
+# yacc/bison is only needed when gram.y changes.
+sub MY::postamble {
+    return <<'MAKE';
+# Cancel the implicit yacc rule so 'make' never requires bison/yacc
+.y.c:
+
+# Regenerate gram.c and gram.h from gram.y (requires bison)
+regen-grammar: gram.y
+	bison -o gram.c -d gram.y
+MAKE
+}
+
 #-cc_files

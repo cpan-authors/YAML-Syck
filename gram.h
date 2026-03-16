@@ -35,8 +35,8 @@
    especially those whose name start with YY_ or yy_.  They are
    private implementation details that can be changed or removed.  */
 
-#ifndef YY_SYCK_GRAM_H_NEW_INCLUDED
-# define YY_SYCK_GRAM_H_NEW_INCLUDED
+#ifndef YY_SYCK_GRAM_H_INCLUDED
+# define YY_SYCK_GRAM_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -98,4 +98,4 @@ int syckparse (void *parser);
 
 #line 100 "gram.h"
 
-#endif /* !YY_SYCK_GRAM_H_NEW_INCLUDED  */
+#endif /* !YY_SYCK_GRAM_H_INCLUDED  */
