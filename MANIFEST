@@ -5,7 +5,6 @@ COPYING
 emitter.c
 gram.c
 gram.h
-gram.y
 handler.c
 implicit.c
 inc/ExtUtils/HasCompiler.pm
