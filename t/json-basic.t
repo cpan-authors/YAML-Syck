@@ -47,12 +47,12 @@ my @tests = (
     '"~foo"',
     { TEST => '"\/"',     TODO => "backslashed char not working yet" }, # escaped solidus
     '"\""',
-    { TEST => '"\b"',     TODO => "backslashed char not working yet" },
-    { TEST => '"\f"',     TODO => "backslashed char not working yet" },
-    { TEST => '"\n"',     TODO => "backslashed char not working yet" },
-    { TEST => '"\r"',     TODO => "backslashed char not working yet" },
-    { TEST => '"\t"',     TODO => "backslashed \\t not working yet" },
-    { TEST => '"\u0001"', TODO => "single-quote mode cannot roundtrip \\uXXXX" },
+    '"\b"',
+    '"\f"',
+    '"\n"',
+    '"\r"',
+    '"\t"',
+    '"\u0001"',
 );
 
 plan tests => scalar @tests * ( 2 + $HAS_JSON ) * 2;
