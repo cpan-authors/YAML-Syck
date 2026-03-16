@@ -80,7 +80,7 @@ union YYSTYPE
     SyckNode *nodeData;
     char *name;
 
-#line 84 "gram.h.new"
+#line 84 "gram.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -96,6 +96,6 @@ int syckparse (void *parser);
 
     int sycklex( YYSTYPE *sycklval, SyckParser *parser );
 
-#line 100 "gram.h.new"
+#line 100 "gram.h"
 
 #endif /* !YY_SYCK_GRAM_H_NEW_INCLUDED  */
