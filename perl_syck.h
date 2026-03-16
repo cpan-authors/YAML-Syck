@@ -969,6 +969,8 @@ yaml_syck_emitter_handler
                 }
 #endif
             }
+            default:
+                break;
         }
         {
             /* Grow tag buffer if ref won't fit (prevents heap overflow) */
