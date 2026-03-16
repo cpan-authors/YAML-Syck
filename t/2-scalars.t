@@ -1,7 +1,7 @@
 use FindBin;
 BEGIN { push @INC, $FindBin::Bin }
 
-use TestYAML tests => 147;
+use TestYAML tests => 149;
 
 ok( YAML::Syck->VERSION, "YAML::Syck has a version and is loaded" );
 
@@ -252,14 +252,10 @@ is( Dump('oN'),   "--- oN\n" );      # invalid case
 is( Dump('oFF'),  "--- oFF\n" );     # invalid case
 is( Dump('nULL'), "--- nULL\n" );    # invalid case
 
-# RT 52432 - '... X'
-my $bad_hash        = { '... X' => '' };
-my $bad_hash_should = "---\n... X: ''\n";
-TODO: {
-    local $TODO;
-    $TODO = "roundtrip is breaking for this right now: '$bad_hash_should'";
-    roundtrip($bad_hash);
-}
+# RT 52432 - '... X' must be quoted to avoid doc-end marker confusion
+is_deeply( Load(Dump({ '... X' => '' })),  { '... X' => '' },  'RT 52432 - roundtrip "... X" key' );
+is_deeply( Load(Dump({ '...' => 'val' })), { '...' => 'val' }, 'RT 52432 - roundtrip "..." key' );
+is_deeply( Load(Dump({ '--- X' => '' })),  { '--- X' => '' },  'roundtrip "--- X" key' );
 
 is( Dump( { foo => "`bar" } ), qq{---\nfoo: "`bar"\n}, 'RT 47944 - back quote is a reserved character' );
 
