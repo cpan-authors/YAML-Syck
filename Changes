@@ -18,7 +18,7 @@
 - Fix backslash-space escape in double-quoted YAML strings (GH #61)
 - Remove trailing whitespace from YAML output lines (GH #37, #38, #39)
 - Fix quoting of \r and \t in YAML output instead of emitting raw bytes (GH #40)
-- Address C-layer audit findings (GH #67)
+- Fix heap buffer overflow in the YAML emitter - CVE-2026-4177 (GH #67)
 - Fix dumping strings with tabs and carriage returns as plain scalars (GH #59)
 - Fix dumping strings starting with '...' as unquoted plain scalars (GH #34)
 - Fix extra newline after empty arrays/hashes in YAML output (GH #36)
