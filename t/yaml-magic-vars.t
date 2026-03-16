@@ -25,7 +25,10 @@ SKIP: {
 }
 
 # Test $$ (process ID)
-{
+# Skipped on perl < 5.18 where mg_get for $$ is a core perl issue
+SKIP: {
+    skip '$$ magic not reliable before perl 5.18', 2 if $] < 5.018;
+
     my $yaml = YAML::Syck::Dump({ pid => $$ });
     unlike( $yaml, qr/~/, '$$ does not dump as undef' );
     like( $yaml, qr/pid: $$/, '$$ dumps its numeric value' );
