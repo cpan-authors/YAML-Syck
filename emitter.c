@@ -140,6 +140,7 @@ syck_new_emitter(void)
     e->lvl_capa = ALLOC_CT;
     e->levels = S_ALLOC_N( SyckLevel, e->lvl_capa ); 
     syck_emitter_reset_levels( e );
+    e->json_mode = 0;
     e->bonus = NULL;
     return e;
 }
@@ -832,18 +833,30 @@ syck_emitter_escape( SyckEmitter *e, unsigned char *src, long len )
     for( i = 0; i < len; i++ )
     {
         /* XXX - scalar_fold overloaded to mean utf8 from Audrey Tang */
-        if( (e->style == scalar_fold)
-                ? ((src[i] < 0x20) && (0 < src[i]))
-                : ((src[i] < 0x20) || (0x7E < src[i])) )
+        if( e->json_mode
+                ? (src[i] < 0x20)
+                : (e->style == scalar_fold)
+                    ? ((src[i] < 0x20) && (0 < src[i]))
+                    : ((src[i] < 0x20) || (0x7E < src[i])) )
         {
-            syck_emitter_write( e, "\\", 1 );
-            if( '\0' == src[i] )
-                syck_emitter_write( e, "0", 1 );
+            if( e->json_mode )
+            {
+                /* JSON only allows \uXXXX for arbitrary characters */
+                char ubuf[7];
+                sprintf( ubuf, "\\u%04x", src[i] );
+                syck_emitter_write( e, ubuf, 6 );
+            }
             else
             {
-                syck_emitter_write( e, "x", 1 );
-                syck_emitter_write( e, (char *)hex_table + ((src[i] & 0xF0) >> 4), 1 );
-                syck_emitter_write( e, (char *)hex_table + (src[i] & 0x0F), 1 );
+                syck_emitter_write( e, "\\", 1 );
+                if( '\0' == src[i] )
+                    syck_emitter_write( e, "0", 1 );
+                else
+                {
+                    syck_emitter_write( e, "x", 1 );
+                    syck_emitter_write( e, (char *)hex_table + ((src[i] & 0xF0) >> 4), 1 );
+                    syck_emitter_write( e, (char *)hex_table + (src[i] & 0x0F), 1 );
+                }
             }
         }
         else
@@ -909,15 +922,29 @@ void syck_emit_2quoted_1( SyckEmitter *e, int width, char *str, long len )
             /* Escape sequences allowed within double quotes. */
             case '\'': syck_emitter_write( e, "\\\'", 2 ); break;
             case '\\': syck_emitter_write( e, "\\\\", 2 ); break;
-            case '\0': syck_emitter_write( e, "\\0",  2 ); break;
-            case '\a': syck_emitter_write( e, "\\a",  2 ); break;
             case '\b': syck_emitter_write( e, "\\b",  2 ); break;
             case '\f': syck_emitter_write( e, "\\f",  2 ); break;
             case '\r': syck_emitter_write( e, "\\r",  2 ); break;
             case '\t': syck_emitter_write( e, "\\t",  2 ); break;
-            case '\v': syck_emitter_write( e, "\\v",  2 ); break;
-            case 0x1b: syck_emitter_write( e, "\\e",  2 ); break;
             case '\n': syck_emitter_write( e, "\\n",  2 ); break;
+
+            /* YAML-only escapes: use \uXXXX in JSON mode */
+            case '\0':
+                if ( e->json_mode ) { syck_emitter_escape( e, (unsigned char *)mark, 1 ); }
+                else                { syck_emitter_write( e, "\\0",  2 ); }
+                break;
+            case '\a':
+                if ( e->json_mode ) { syck_emitter_escape( e, (unsigned char *)mark, 1 ); }
+                else                { syck_emitter_write( e, "\\a",  2 ); }
+                break;
+            case '\v':
+                if ( e->json_mode ) { syck_emitter_escape( e, (unsigned char *)mark, 1 ); }
+                else                { syck_emitter_write( e, "\\v",  2 ); }
+                break;
+            case 0x1b:
+                if ( e->json_mode ) { syck_emitter_escape( e, (unsigned char *)mark, 1 ); }
+                else                { syck_emitter_write( e, "\\e",  2 ); }
+                break;
 
             /* XXX - Disabled by Audrey Tang for YAML.pm compat
             case '\n':
@@ -972,15 +999,29 @@ void syck_emit_2quoted( SyckEmitter *e, int width, char *str, long len )
             /* Escape sequences allowed within double quotes. */
             case '"':  syck_emitter_write( e, "\\\"", 2 ); break;
             case '\\': syck_emitter_write( e, "\\\\", 2 ); break;
-            case '\0': syck_emitter_write( e, "\\0",  2 ); break;
-            case '\a': syck_emitter_write( e, "\\a",  2 ); break;
             case '\b': syck_emitter_write( e, "\\b",  2 ); break;
             case '\f': syck_emitter_write( e, "\\f",  2 ); break;
             case '\r': syck_emitter_write( e, "\\r",  2 ); break;
             case '\t': syck_emitter_write( e, "\\t",  2 ); break;
-            case '\v': syck_emitter_write( e, "\\v",  2 ); break;
-            case 0x1b: syck_emitter_write( e, "\\e",  2 ); break;
             case '\n': syck_emitter_write( e, "\\n",  2 ); break;
+
+            /* YAML-only escapes: use \uXXXX in JSON mode */
+            case '\0':
+                if ( e->json_mode ) { syck_emitter_escape( e, (unsigned char *)mark, 1 ); }
+                else                { syck_emitter_write( e, "\\0",  2 ); }
+                break;
+            case '\a':
+                if ( e->json_mode ) { syck_emitter_escape( e, (unsigned char *)mark, 1 ); }
+                else                { syck_emitter_write( e, "\\a",  2 ); }
+                break;
+            case '\v':
+                if ( e->json_mode ) { syck_emitter_escape( e, (unsigned char *)mark, 1 ); }
+                else                { syck_emitter_write( e, "\\v",  2 ); }
+                break;
+            case 0x1b:
+                if ( e->json_mode ) { syck_emitter_escape( e, (unsigned char *)mark, 1 ); }
+                else                { syck_emitter_write( e, "\\e",  2 ); }
+                break;
 
             /* XXX - Disabled by Audrey Tang for YAML.pm compat
             case '\n':
