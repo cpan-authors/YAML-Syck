@@ -1396,8 +1396,25 @@ DumpYAMLFile
     bonus.out.outio = out;
     bonus.ioerror = 0;
 #ifdef YAML_IS_JSON
-    DumpJSONImpl(sv, &bonus, perl_syck_output_handler_io);
-    /* TODO: how do we do perl_json_postprocess? */
+    {
+        /* Buffer into an SV so we can apply perl_json_postprocess(),
+         * then write the postprocessed result to the file handle. */
+        SV *buf = newSVpvn("", 0);
+        STRLEN len;
+        char *s;
+        bonus.out.outsv = buf;
+        DumpJSONImpl(sv, &bonus, perl_syck_output_handler_pv);
+        if (SvCUR(buf) > 0) {
+            perl_json_postprocess(buf);
+        }
+        s = SvPV(buf, len);
+        if (len > 0) {
+            if (PerlIO_write(out, s, len) != (SSize_t)len) {
+                bonus.ioerror = errno;
+            }
+        }
+        SvREFCNT_dec(buf);
+    }
 #else
     DumpYAMLImpl(sv, &bonus, perl_syck_output_handler_io);
 #endif

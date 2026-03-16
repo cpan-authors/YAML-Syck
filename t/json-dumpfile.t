@@ -26,8 +26,8 @@ sub file_contents_is {
 }
 
 my $data          = { hello => 1 };
-# DumpJSONFile (C-level) adds a space after ':' and a trailing newline
-my $expected_json = "{\"hello\": 1}\n";
+# DumpFile output must now match Dump output (postprocessed: no extra spaces, no trailing newline)
+my $expected_json = JSON::Syck::Dump($data);
 
 # using file name
 {
@@ -104,8 +104,7 @@ SKIP: {
     package main;
     tie *TFH, 'TiedFH';
     DumpFile(\*TFH, $data);
-    # Tied path uses Perl-level DumpJSON (no trailing newline, no space after colon)
-    is(tied(*TFH)->data, '{"hello":1}', 'DumpFile works with tied filehandles');
+    is(tied(*TFH)->data, $expected_json, 'DumpFile works with tied filehandles');
     untie *TFH;
 }
 
