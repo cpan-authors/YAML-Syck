@@ -43,7 +43,7 @@ prove -bv t/1-basic.t
 ## CI
 
 GitHub Actions runs on push/PR across Ubuntu, macOS, and Windows.
-Linux tests run against all Perl versions from 5.10 through devel using `perldocker`.
+Linux tests run against all Perl versions from 5.8 through devel using `perldocker`.
 CI sets `AUTOMATED_TESTING=1` which enables memory leak tests (`t/leak.t` requires `Devel::Leak`).
 
 ## Releasing
@@ -60,7 +60,7 @@ CI sets `AUTOMATED_TESTING=1` which enables memory leak tests (`t/leak.t` requir
 
 ## Coding Conventions
 
-- Perl minimum version: 5.010
+- Perl minimum version: 5.8
 - Tests use `Test::More`
 - Bug regression tests go in `t/` and are named after the GitHub issue (`t/gh-*.t`)
 - C code follows libsyck style; Perl-side logic is in `perl_syck.h`
