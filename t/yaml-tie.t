@@ -26,7 +26,10 @@ use Tie::Hash;
     }
 
     # Tied hash reference dumps content (no class tag since \%h is not blessed)
-    is( Dump( \%h ), "---\na: 1\nb: 2\nc: '3.1415'\nd: 4\n", "tied hash ref dumps content" );
+  TODO: {
+        local $TODO = "Perl 5.8 tied hash iteration loses some values" unless ( $] > '5.009888' || $] < '5.007' );
+        is( Dump( \%h ), "---\na: 1\nb: 2\nc: '3.1415'\nd: 4\n", "tied hash ref dumps content" );
+    }
 }
 
 # Tied hash with individual key assignment
