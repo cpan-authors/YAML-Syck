@@ -87,14 +87,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: perl-actions/ci-perl-tester-helpers/report-perl@main
-      - uses: perl-actions/ci-perl-tester-helpers/install-test-helper-deps@main
-      - uses: perl-actions/ci-perl-tester-helpers/cpan-install-build-deps@main
-      - uses: perl-actions/ci-perl-tester-helpers/build-dist@main
-      - uses: perl-actions/ci-perl-tester-helpers/cpan-install-dist-deps@main
-      - uses: perl-actions/ci-perl-tester-helpers/test-dist@main
-        env:
-          AUTHOR_TESTING: 1
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        uses: perl-actions/install-with-cpm@v1
+        with:
+          sudo: false
+          cpanfile: "cpanfile"
+      - run: perl Makefile.PL
+      - run: make
+      - run: make test
 
   macOS:
     needs: [ubuntu, linux, windows]
