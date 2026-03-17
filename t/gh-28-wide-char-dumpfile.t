@@ -54,7 +54,7 @@ my $euro = "\x{20ac}";
     package TiedFH28;
     sub TIEHANDLE { bless { data => '' }, shift }
     sub WRITE     { $_[0]->{data} .= substr($_[1], $_[3] || 0, $_[2]); return $_[2] }
-    sub PRINT     { my $self = shift; $self->{data} .= join($,//'', @_); $self->{data} .= $\//'' ; 1 }
+    sub PRINT     { my $self = shift; $self->{data} .= join(defined $, ? $, : '', @_); $self->{data} .= defined $\ ? $\ : '' ; 1 }
     sub data      { $_[0]->{data} }
 
     package main;
