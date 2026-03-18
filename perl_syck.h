@@ -1009,6 +1009,44 @@ yaml_syck_emitter_handler
     }
 #endif
 
+    /*
+     * For blessed scalar refs that were flattened (sv = SvRV(sv) in SVt_PVMG
+     * above), the inner scalar may have an anchor from the marking pass.
+     * Since we emit it via syck_emit_scalar() (not syck_emit()), we must
+     * handle anchors/aliases manually here.
+     */
+#ifndef YAML_IS_JSON
+    if (ref_orig != NULL && !SvROK(sv)) {
+        st_data_t oid;
+        char *anchor_name = NULL;
+        if (e->anchors != NULL &&
+            st_lookup(e->markers, (st_data_t)sv, &oid) &&
+            st_lookup(e->anchors, (st_data_t)oid, (st_data_t *)&anchor_name))
+        {
+            if (e->anchored == NULL) {
+                e->anchored = st_init_numtable();
+            }
+            if (!st_lookup(e->anchored, (st_data_t)anchor_name, 0)) {
+                /* First occurrence: write &N before the tag+scalar */
+                char *an = S_ALLOC_N(char, strlen(anchor_name) + 3);
+                sprintf(an, "&%s ", anchor_name);
+                syck_emitter_write(e, an, strlen(anchor_name) + 2);
+                S_FREE(an);
+                st_insert(e->anchored, (st_data_t)anchor_name, 0);
+            }
+            else {
+                /* Already emitted: write *N alias and return */
+                char *an = S_ALLOC_N(char, strlen(anchor_name) + 2);
+                sprintf(an, "*%s", anchor_name);
+                syck_emitter_write(e, an, strlen(anchor_name) + 1);
+                S_FREE(an);
+                Safefree(ref_orig);
+                return;
+            }
+        }
+    }
+#endif
+
     if (SvROK(sv)) {
         /* emit a scalar ref */
 #ifdef YAML_IS_JSON
