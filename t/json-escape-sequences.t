@@ -64,6 +64,7 @@ my @dump_tests = (
     [ 'dump bell',             "hello\x07world",  '"hello\u0007world"' ],
     [ 'dump vertical tab',    "hello\x0bworld",   '"hello\u000bworld"' ],
     [ 'dump escape char',     "hello\x1bworld",   '"hello\u001bworld"' ],
+    [ 'dump solidus',          'hello/world',      '"hello\/world"' ],
 );
 
 # Roundtrip tests: Load(Dump(x)) == x
@@ -76,6 +77,7 @@ my @roundtrip_tests = (
     [ 'roundtrip null byte',   "line1\x00line2" ],
     [ 'roundtrip mixed',       "tab\there\nnew\r\n" ],
     [ 'roundtrip control chars', "\x01\x02\x1f" ],
+    [ 'roundtrip solidus',     'http://example.com/' ],
 );
 
 plan tests => scalar(@load_tests) + scalar(@dump_tests) + scalar(@roundtrip_tests);
