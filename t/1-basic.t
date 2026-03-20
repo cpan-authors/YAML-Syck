@@ -31,10 +31,9 @@ TODO: {
     is( $out, undef, "Bad data fails load" );
 }
 
-TODO: {
+{
     my $out = eval { Load("---\n- ! >-\n") };
 
-    local $TODO = 'RT 23850 - META.yml of DMAKI/DateTime-Format-Japanese-0.01.tar.gz cannot be parsed';
-    is( $@, '', "Bad data dies on Load" );
-    is_deeply( $out, [''], "Bad data fails load" );
+    is( $@, '', "! >- (empty tag + block scalar) parses without error (RT 23850)" );
+    is_deeply( $out, [''], "! >- returns array with empty string (RT 23850)" );
 }
