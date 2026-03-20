@@ -337,10 +337,17 @@ yaml_syck_parser_handler
                 char *type = strtok(NULL, "");
 
                 if (lang == NULL || (strEQ(lang, "perl"))) {
-                    sv = newSVpv(type, 0);
+                    if (type != NULL) {
+                        sv = newSVpv(type, 0);
+                    } else {
+                        /* Tag has no type component (e.g. "!perl =") —
+                         * fall back to raw scalar content */
+                        sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+                        CHECK_UTF8;
+                    }
                 }
                 else {
-                    sv = newSVpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), 0);
+                    sv = newSVpv((type == NULL) ? lang : form("%s::%s", lang, type), 0);
                 }
                 Safefree(id_copy);
             } else if ( strEQ( id, "perl/scalar" ) || strnEQ( id, "perl/scalar:", 12 ) ) {
@@ -396,7 +403,7 @@ yaml_syck_parser_handler
 						}
 					}
 					else {
-						sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+						sv_bless(sv, gv_stashpv((type == NULL) ? lang : form("%s::%s", lang, type), TRUE));
 					}
                 }
                 Safefree(id_copy);
@@ -453,7 +460,7 @@ yaml_syck_parser_handler
                 		}
                 	}
                 	else {
-                		sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+                		sv_bless(sv, gv_stashpv((type == NULL) ? lang : form("%s::%s", lang, type), TRUE));
                 	}
                 }
                 Safefree(id_copy);
@@ -501,7 +508,7 @@ yaml_syck_parser_handler
 								}
 							}
 							else {
-								sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+								sv_bless(sv, gv_stashpv((type == NULL) ? lang : form("%s::%s", lang, type), TRUE));
 							}
 						Safefree(id_copy);
 					}
@@ -551,7 +558,7 @@ yaml_syck_parser_handler
 							}
 						}
 						else {
-							sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+							sv_bless(sv, gv_stashpv((type == NULL) ? lang : form("%s::%s", lang, type), TRUE));
 						}
 						Safefree(id_copy);
 					}
@@ -610,7 +617,7 @@ yaml_syck_parser_handler
 								sv_bless(sv, gv_stashpv(type, TRUE));
 							}
 						} else {
-							sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+							sv_bless(sv, gv_stashpv((type == NULL) ? lang : form("%s::%s", lang, type), TRUE));
 						}
                     }
                     Safefree(id_copy);
