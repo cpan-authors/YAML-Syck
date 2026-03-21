@@ -47,12 +47,12 @@ subtest 'boolean false values' => sub {
 
 # ── Integer types ───────────────────────────────────────────────────
 subtest 'decimal integers' => sub {
-    is( load_val('0'),     0,      '0' );
-    is( load_val('1'),     1,      '1' );
-    is( load_val('42'),    42,     '42' );
+    is( load_val('0'),     0,      'number 0' );
+    is( load_val('1'),     1,      'number 1' );
+    is( load_val('42'),    42,     'number 42' );
     is( load_val('-1'),    -1,     '-1' );
     is( load_val('+1'),    1,      '+1' );
-    is( load_val('1000'),  1000,   '1000' );
+    is( load_val('1000'),  1000,   'number 1000' );
 };
 
 subtest 'integers with commas (YAML 1.0)' => sub {
