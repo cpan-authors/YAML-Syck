@@ -195,16 +195,20 @@ yaml_syck_parser_handler
                 {
                     NV bnum = 0;
                     char *colon = end - 1;
-                    while ( colon >= ptr && *colon != ':' )
+                    while ( colon > ptr && *colon != ':' )
                     {
                         colon--;
                     }
-                    if ( *colon == ':' ) *colon = '\0';
-
-                    bnum = strtod( colon + 1, NULL );
+                    if ( *colon == ':' ) {
+                        *colon = '\0';
+                        bnum = strtod( colon + 1, NULL );
+                        end = colon;
+                    } else {
+                        bnum = strtod( ptr, NULL );
+                        end = ptr;
+                    }
                     total += bnum * sixty;
                     sixty *= 60;
-                    end = colon;
                 }
                 sv = newSVnv(total);
 #ifdef NV_NAN
@@ -233,16 +237,20 @@ yaml_syck_parser_handler
                 {
                     long bnum = 0;
                     char *colon = end - 1;
-                    while ( colon >= ptr && *colon != ':' )
+                    while ( colon > ptr && *colon != ':' )
                     {
                         colon--;
                     }
-                    if ( *colon == ':' ) *colon = '\0';
-
-                    bnum = strtol( colon + 1, NULL, 10 );
+                    if ( *colon == ':' ) {
+                        *colon = '\0';
+                        bnum = strtol( colon + 1, NULL, 10 );
+                        end = colon;
+                    } else {
+                        bnum = strtol( ptr, NULL, 10 );
+                        end = ptr;
+                    }
                     total += bnum * sixty;
                     sixty *= 60;
-                    end = colon;
                 }
                 sv = newSVuv(total);
             } else if (strEQ( id, "int#hex" )) {
