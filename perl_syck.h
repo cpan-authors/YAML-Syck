@@ -341,8 +341,9 @@ yaml_syck_parser_handler
             } else if (strnEQ( n->data.str->ptr, REF_LITERAL, 1+REF_LITERAL_LENGTH)) {
                 /* type tag in a scalar ref */
                 char *id_copy = savepv(id);
-                char *lang = strtok(id_copy, "/:");
-                char *type = strtok(NULL, "");
+                char *lang = id_copy;
+                char *type = strpbrk(id_copy, "/:");
+                if (type != NULL) { *type = '\0'; type++; if (*type == '\0') type = NULL; }
 
                 if (lang == NULL || (strEQ(lang, "perl"))) {
                     if (type != NULL) {
@@ -380,8 +381,9 @@ yaml_syck_parser_handler
                 dSP;
                 SV *val = newSVpvn(n->data.str->ptr, n->data.str->len);
                 char *id_copy = savepv(id);
-                char *lang = strtok(id_copy, "/:");
-                char *type = strtok(NULL, "");
+                char *lang = id_copy;
+                char *type = strpbrk(id_copy, "/:");
+                if (type != NULL) { *type = '\0'; type++; if (*type == '\0') type = NULL; }
 
                 ENTER;
                 SAVETMPS;
@@ -447,8 +449,9 @@ yaml_syck_parser_handler
             if (id) {
                 /* bless it if necessary */
                 char *id_copy = savepv(id);
-                char *lang = strtok(id_copy, "/:");
-                char *type = strtok(NULL, "");
+                char *lang = id_copy;
+                char *type = strpbrk(id_copy, "/:");
+                if (type != NULL) { *type = '\0'; type++; if (*type == '\0') type = NULL; }
 
                 if ( type != NULL ) {
                     if (strnEQ(type, "array:", 6)) {
@@ -502,8 +505,9 @@ yaml_syck_parser_handler
 					else {
 						/* bless it if necessary */
 						char *id_copy = savepv(id);
-						char *lang = strtok(id_copy, "/:");
-						char *type = strtok(NULL, "");
+						char *lang = id_copy;
+						char *type = strpbrk(id_copy, "/:");
+						if (type != NULL) { *type = '\0'; type++; if (*type == '\0') type = NULL; }
 
 						if ( type != NULL && strnEQ(type, "ref:", 4)) {
 							/* !perl/ref:Foo::Bar blesses into Foo::Bar */
@@ -551,8 +555,9 @@ yaml_syck_parser_handler
 					else {
 						/* bless it if necessary */
 						char *id_copy = savepv(id);
-						char *lang = strtok(id_copy, "/:");
-						char *type = strtok(NULL, "");
+						char *lang = id_copy;
+						char *type = strpbrk(id_copy, "/:");
+						if (type != NULL) { *type = '\0'; type++; if (*type == '\0') type = NULL; }
 
 						if ( type != NULL && strnEQ(type, "regexp:", 7)) {
 							/* !perl/regexp:Foo::Bar blesses into Foo::Bar */
@@ -605,8 +610,9 @@ yaml_syck_parser_handler
                 if (id)  {
                     /* bless it if necessary */
                     char *id_copy = savepv(id);
-                    char *lang = strtok(id_copy, "/:");
-                    char *type = strtok(NULL, "");
+                    char *lang = id_copy;
+                    char *type = strpbrk(id_copy, "/:");
+                    if (type != NULL) { *type = '\0'; type++; if (*type == '\0') type = NULL; }
 
                     if ( type != NULL ) {
                         if (strnEQ(type, "hash:", 5)) {
@@ -652,7 +658,7 @@ yaml_syck_parser_handler
 
 #ifdef YAML_IS_JSON
 static char* perl_json_preprocess(char *s) {
-    int i;
+    STRLEN i;
     char *out;
     char ch;
     char in_string = '\0';
@@ -717,7 +723,7 @@ static char* perl_json_preprocess(char *s) {
 }
 
 void perl_json_postprocess(SV *sv) {
-    int i;
+    STRLEN i;
     char ch;
     bool in_string = 0;
     bool in_quote  = 0;
@@ -1139,12 +1145,13 @@ yaml_syck_emitter_handler
             /* scan string for high-bits in the SV */
             bool is_ascii = TRUE;
             char *str = SvPV_nolen(sv);
-            STRLEN len = sv_len(sv);
+            STRLEN bin_len = sv_len(sv);
+            STRLEN bi;
 
-            for (i = 0; i < len; i++) {
-                if (*(str + i) & 0x80) {
+            for (bi = 0; bi < bin_len; bi++) {
+                if (*(str + bi) & 0x80) {
                     /* Binary here */
-                    char *base64 = syck_base64enc( str, len );
+                    char *base64 = syck_base64enc( str, bin_len );
                     syck_emit_scalar(e, "tag:yaml.org,2002:binary", SCALAR_STRING, 0, 0, 0, base64, strlen(base64));
                     is_ascii = FALSE;
                     break;
@@ -1152,7 +1159,7 @@ yaml_syck_emitter_handler
             }
 
             if (is_ascii) {
-                syck_emit_scalar(e, OBJOF("str"), SCALAR_STRING, 0, 0, 0, str, len);
+                syck_emit_scalar(e, OBJOF("str"), SCALAR_STRING, 0, 0, 0, str, bin_len);
             }
         }
 #endif
