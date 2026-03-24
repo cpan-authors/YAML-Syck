@@ -207,6 +207,10 @@ The `libsyck` code bundled with this library is released by
 "why the lucky stiff", under a BSD-style license.  See the `COPYING`
 file for details.
 
+# AI POLICY
+
+This project uses AI tools to assist development. Humans review and approve every change before it is merged. See [AI\_POLICY.md](AI_POLICY.md) for details.
+
 ## The "MIT" License
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
