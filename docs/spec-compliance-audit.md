@@ -90,8 +90,8 @@ YAML-Syck is genuinely 1.0-aligned. The following analysis checks key areas wher
 ### `%TAG` directive
 - **1.0**: Uses transfer method notation (`!` and `!!` as shorthand for tag URIs)
 - **1.1**: Formalized `%TAG` directive with handle/prefix pairs
-- **YAML-Syck behavior**: No `%TAG` directive parsing found. The `!`/`!!` tag shorthands work as per 1.0. The emitter can output `--- %YAML:1.0` header.
-- **Drift**: None. Absence of `%TAG` is consistent with 1.0 which did not have the 1.1-style `%TAG` directive.
+- **YAML-Syck behavior**: `%TAG` directive lines are now skipped in the document header (not treated as content). Tag prefix expansion is not implemented — `!`/`!!` shorthands resolve using YAML 1.0 defaults. The emitter can output `--- %YAML:1.0` header.
+- **Drift**: None. Graceful skipping of `%TAG` is consistent with 1.0 which did not have the 1.1-style `%TAG` directive.
 
 ### Tag URI domain
 - **1.0/1.1 shared**: `yaml.org,2002`
@@ -114,9 +114,11 @@ directive model.
 | Comments | `t/yaml-comments.t` (9 tests) | **Added — all pass** | None |
 | Merge key (`<<`) | `t/yaml-merge-key.t` (20 tests) | **Added — all pass** | None |
 | Timestamps | `t/yaml-timestamps.t` (13 tests) | **Added — all pass** | None |
-| Directives (`%YAML`, `%TAG`) | `t/yaml-directives.t` (9 tests) | **Added — pass with TODO** | `%TAG` directive not parsed (TODO) |
+| Directives (`%YAML`, `%TAG`) | `t/yaml-directives.t` (15 tests) | **Added — all pass** | `%TAG` directives skipped (not expanded); `%YAML` directives skipped |
 
 ## Known Limitations (TODO'd tests)
 
-1. **`%TAG` directive not parsed** — The parser treats `%TAG` lines as content, not directives.
-   The `%YAML:1.0` directive is handled via a legacy compatibility path. Test: `t/yaml-directives.t`.
+1. **`%TAG` directive skipped but not expanded** — The parser now correctly skips `%TAG` and
+   `%YAML` directive lines in the document header (they no longer corrupt the parse), but tag
+   prefix mappings from `%TAG` are not applied. Shorthand tags resolve using YAML 1.0 defaults.
+   Test: `t/yaml-directives.t`.

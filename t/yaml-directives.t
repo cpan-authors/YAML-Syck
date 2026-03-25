@@ -74,17 +74,37 @@ YAML
     is( $data->{nested}{key}, 'value', 'nested mapping after directive' );
 }
 
-# --- %TAG directive (not supported by parser) ---
+# --- %TAG directive (skipped by parser) ---
+# The parser now skips %TAG lines in the document header (like comments),
+# so they don't corrupt the parse. Tag prefix expansion is not implemented —
+# !shorthand tags resolve using YAML 1.0 defaults, not %TAG mappings.
 
-TODO: {
-    local $TODO = '%TAG directive parsing not supported by bundled libsyck';
-
-    my $yaml = "%TAG ! tag:example.com,2000:\n---\n!foo bar\n";
+{
+    my $yaml = "\%TAG ! tag:example.com,2000:\n---\n!foo bar\n";
     my $data = eval { Load($yaml) };
-    # The parser treats %TAG as content rather than a directive,
-    # so we check that the result is a scalar (not a misparse as a mapping key)
+    ok( !$@, '%TAG directive does not cause parse error' );
     ok( defined $data && !ref($data),
-        '%TAG directive parsed correctly as directive, not content' );
+        '%TAG directive skipped, document content parsed correctly' );
+    is( $data, 'bar',
+        '%TAG line not treated as content (value is bar, not a mapping)' );
+}
+
+# --- Multiple %TAG directives ---
+
+{
+    my $yaml = "\%TAG ! tag:example.com,2000:\n\%TAG !! tag:yaml.org,2002:\n---\nkey: value\n";
+    my $data = eval { Load($yaml) };
+    ok( !$@, 'multiple %TAG directives do not cause parse error' );
+    is( $data->{key}, 'value', 'document after multiple %TAG directives parses correctly' );
+}
+
+# --- %YAML directive before document ---
+
+{
+    my $yaml = "\%YAML 1.1\n---\nkey: value\n";
+    my $data = eval { Load($yaml) };
+    ok( !$@, '%YAML directive before --- does not cause parse error' );
+    is( $data->{key}, 'value', 'document after %YAML directive parses correctly' );
 }
 
 done_testing();
