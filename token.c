@@ -316,7 +316,8 @@ Header:
 	case ' ':	goto yy12;
 	case 0x0A:	goto yy9;
 	case 0x0D:	goto yy11;
-	case '#':	goto yy5;
+	case '#':
+	case '%':	goto yy5;
 	case '-':	goto yy2;
 	case '.':	goto yy4;
 	default:	goto yy14;
