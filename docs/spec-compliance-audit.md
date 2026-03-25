@@ -12,9 +12,9 @@ YAML-Syck declares itself a YAML 1.0 parser (`syck.h` defines `SYCK_YAML_MAJOR=1
 | Scalars | Plain scalars | `t/2-scalars.t`, `t/yaml-implicit-typing.t` | Covered | None | Tested as part of roundtrip and implicit typing |
 | Scalars | Single-quoted scalars | `t/2-scalars.t` (SingleQuote flag) | Covered | None | Tests roundtrip with `$SingleQuote` flag |
 | Scalars | Double-quoted scalars | `t/2-scalars.t` (lines 278-303) | Covered | None | Tests escape sequences: `\t`, `\r`, `\a`, `\e`, `\\ ` |
-| Scalars | Literal block (`\|`) | — | **Missing** | N/A | C code supports via `BLOCK_LIT` constant; no Perl tests. New: `t/yaml-block-scalars.t` |
-| Scalars | Folded block (`>`) | — | **Missing** | N/A | C code supports via `BLOCK_FOLD` constant; no Perl tests. New: `t/yaml-block-scalars.t` |
-| Scalars | Chomping (`\|+`, `\|-`, `>+`, `>-`) | — | **Missing** | N/A | C code supports via `NL_CHOMP`/`NL_KEEP`; no tests. New: `t/yaml-block-scalars.t` |
+| Scalars | Literal block (`\|`) | `t/yaml-block-scalars.t` | Covered | None | Preserves newlines, strip/keep chomping, sequences |
+| Scalars | Folded block (`>`) | `t/yaml-block-scalars.t` | Covered | None | Folds newlines to spaces, blank line preservation, chomping |
+| Scalars | Chomping (`\|+`, `\|-`, `>+`, `>-`) | `t/yaml-block-scalars.t` | Covered | None | Clip (default), strip (`-`), keep (`+`) all tested |
 | **Collections** | | | | | |
 | Collections | Block sequences | `t/1-basic.t`, `t/2-scalars.t`, `t/3-objects.t` | Covered | None | Extensively tested throughout |
 | Collections | Block mappings | `t/1-basic.t`, `t/2-scalars.t`, `t/3-objects.t` | Covered | None | Extensively tested throughout |
@@ -34,7 +34,7 @@ YAML-Syck declares itself a YAML 1.0 parser (`syck.h` defines `SYCK_YAML_MAJOR=1
 | Implicit Typing | Float (base-60) | `t/yaml-implicit-typing.t` | Covered | None (1.0) | `1:30.5`=90.5 — 1.0 feature |
 | Implicit Typing | Integers with commas (`1,000`) | `t/yaml-implicit-typing.t` (not-integer check) | Partial | None (1.0) | `1,000` not tested as integer; `implicit.c` supports commas via `syck_str_blow_away_commas()` |
 | Implicit Typing | Merge key (`<<`) | `t/yaml-merge-key.t` (20 tests) | Covered | None | Single mapping merge, sequence-of-mappings merge, override precedence, ImplicitTyping gate |
-| Implicit Typing | Timestamps | — | **Missing** | N/A | Not tested. `implicit.c` recognizes timestamp patterns. New: `t/yaml-timestamps.t` |
+| Implicit Typing | Timestamps | `t/yaml-timestamps.t` | Covered | None | Date, spaced, ISO 8601 formats; ImplicitTyping gate; quoted bypass |
 | **Anchors & Aliases** | | | | | |
 | Anchors | `&anchor` / `*alias` | `t/yaml-alias.t`, `t/1-basic.t`, `t/2-scalars.t` | Covered | None | Scalars, arrays, hashes, circular refs |
 | **Tags** | | | | | |
@@ -43,15 +43,15 @@ YAML-Syck declares itself a YAML 1.0 parser (`syck.h` defines `SYCK_YAML_MAJOR=1
 | Tags | Tag URI domain | — | N/A | None | `syck.h` defines `YAML_DOMAIN "yaml.org,2002"` (shared by 1.0 and 1.1) |
 | **Documents** | | | | | |
 | Documents | Document start (`---`) | `t/1-basic.t`, `t/2-scalars.t` | Covered | None | Tested throughout |
-| Documents | Multi-document streams | `t/2-scalars.t` (line 191), `t/1-basic.t` | Partial | None | Only simple `Dump(1,2,3)` tested. New: `t/yaml-multi-document.t` |
-| Documents | Document end (`...`) | `t/2-scalars.t` (line 247-248) | Partial | None | Only roundtrip quoting of `...` as a key. New: `t/yaml-multi-document.t` |
+| Documents | Multi-document streams | `t/2-scalars.t` (line 191), `t/1-basic.t`, `t/yaml-multi-document.t` | Covered | None | Simple and complex multi-doc streams, inline values after `---`, plain scalars, `...` terminator |
+| Documents | Document end (`...`) | `t/2-scalars.t` (line 247-248), `t/yaml-multi-document.t` | Covered | None | Roundtrip quoting of `...` as key; `...` as document terminator between documents |
 | **Directives** | | | | | |
-| Directives | `%YAML` directive | — | **Missing** | N/A | Emitter can output `--- %YAML:1.0` via `use_version=1`. Parser converts `#YAML:1.0` to `%YAML:1.0`. New: `t/yaml-directives.t` |
-| Directives | `%TAG` directive | — | **Missing** | N/A | No parser support found in codebase. New: `t/yaml-directives.t` (TODO) |
+| Directives | `%YAML` directive | `t/yaml-directives.t` | Covered | None | Legacy `#YAML:1.0` and `%YAML:1.0` headers; headless mode; emitter `use_version=1` |
+| Directives | `%TAG` directive | `t/yaml-directives.t` | Covered | None (1.0) | `%TAG` lines gracefully skipped (not expanded); consistent with 1.0 which lacks 1.1-style `%TAG` |
 | **Escape Sequences** | | | | | |
 | Escape Sequences | Double-quoted escapes | `t/2-scalars.t`, `t/bug/rt-41141.t` | Covered | None | `\t`, `\r`, `\a`, `\e`, `\\ `, control chars |
 | **Comments** | | | | | |
-| Comments | `#` comments | — | **Missing** | N/A | No dedicated tests. New: `t/yaml-comments.t` |
+| Comments | `#` comments | `t/yaml-comments.t` | Covered | None | Full-line, inline, nested, multi-line, and document-start comments |
 | **Binary** | | | | | |
 | Binary | `!binary` / base64 | `t/2-scalars.t` (lines 194-198) | Covered | None | Uses `ImplicitBinary` flag |
 | **Unicode** | | | | | |
@@ -101,18 +101,18 @@ YAML-Syck is genuinely 1.0-aligned. The following analysis checks key areas wher
 ### Overall finding
 **YAML-Syck is genuinely YAML 1.0 compliant in its type system.** No 1.1 or 1.2 drift
 was found. The implicit typing rules (booleans, base-60, commas in integers, scientific
-notation sign requirement) all match the 1.0 specification. Structural features like
-`%TAG` directive parsing are absent, which is consistent with the 1.0 spec's simpler
-directive model.
+notation sign requirement) all match the 1.0 specification. `%TAG` directive lines are
+gracefully skipped (not expanded), which is consistent with the 1.0 spec's simpler
+directive model. All previously identified test coverage gaps have been addressed.
 
-## Summary of Coverage Gaps (now addressed)
+## Previously Identified Coverage Gaps (all addressed)
 
-| Gap | New Test File | Status | Known Limitations |
+| Area | Test File | Tests | Known Limitations |
 |---|---|---|---|
-| Block scalars (literal, folded, chomping) | `t/yaml-block-scalars.t` (13 tests) | **Added — all pass** | None |
-| Multi-document streams and `...` marker | `t/yaml-multi-document.t` (23 tests) | **Added — all pass** | Plain scalars on next line after `---` not split (TODO) |
-| Comments | `t/yaml-comments.t` (9 tests) | **Added — all pass** | None |
-| Merge key (`<<`) | `t/yaml-merge-key.t` (20 tests) | **Added — all pass** | None |
-| Timestamps | `t/yaml-timestamps.t` (13 tests) | **Added — all pass** | None |
-| Directives (`%YAML`, `%TAG`) | `t/yaml-directives.t` (15 tests) | **Added — all pass** | `%TAG` directives skipped (not expanded); `%YAML` directives skipped |
+| Block scalars (literal, folded, chomping) | `t/yaml-block-scalars.t` | 13 | None |
+| Multi-document streams and `...` marker | `t/yaml-multi-document.t` | 34 | None |
+| Comments | `t/yaml-comments.t` | 9 | None |
+| Merge key (`<<`) | `t/yaml-merge-key.t` | 20 | None |
+| Timestamps | `t/yaml-timestamps.t` | 13 | None |
+| Directives (`%YAML`, `%TAG`) | `t/yaml-directives.t` | 15 | `%TAG` directives skipped (not expanded); consistent with 1.0 spec |
 
