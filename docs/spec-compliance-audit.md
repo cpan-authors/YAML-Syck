@@ -105,13 +105,24 @@ notation sign requirement) all match the 1.0 specification. Structural features 
 `%TAG` directive parsing are absent, which is consistent with the 1.0 spec's simpler
 directive model.
 
-## Summary of Coverage Gaps
+## Summary of Coverage Gaps (now addressed)
 
-| Gap | New Test File | Status |
-|---|---|---|
-| Block scalars (literal, folded, chomping) | `t/yaml-block-scalars.t` | To be added |
-| Multi-document streams and `...` marker | `t/yaml-multi-document.t` | To be added |
-| Comments | `t/yaml-comments.t` | To be added |
-| Merge key (`<<`) | `t/yaml-merge-key.t` | To be added |
-| Timestamps | `t/yaml-timestamps.t` | To be added |
-| Directives (`%YAML`, `%TAG`) | `t/yaml-directives.t` | To be added |
+| Gap | New Test File | Status | Known Limitations |
+|---|---|---|---|
+| Block scalars (literal, folded, chomping) | `t/yaml-block-scalars.t` (13 tests) | **Added — all pass** | None |
+| Multi-document streams and `...` marker | `t/yaml-multi-document.t` (23 tests) | **Added — all pass** | Plain scalars on next line after `---` not split (TODO) |
+| Comments | `t/yaml-comments.t` (9 tests) | **Added — all pass** | None |
+| Merge key (`<<`) | `t/yaml-merge-key.t` (11 tests) | **Added — pass with TODOs** | `<<` stored as literal key, not merged (TODO). Sequence merge unsupported (TODO). |
+| Timestamps | `t/yaml-timestamps.t` (13 tests) | **Added — all pass** | None |
+| Directives (`%YAML`, `%TAG`) | `t/yaml-directives.t` (9 tests) | **Added — pass with TODO** | `%TAG` directive not parsed (TODO) |
+
+## Known Limitations (TODO'd tests)
+
+1. **Merge key (`<<`) not implemented** — `implicit.c` recognizes `<<` as the merge type,
+   but `perl_syck.h` stores it as a literal `<<` hash key rather than merging the referenced
+   mapping's keys into the parent. Test: `t/yaml-merge-key.t`.
+2. **`%TAG` directive not parsed** — The parser treats `%TAG` lines as content, not directives.
+   The `%YAML:1.0` directive is handled via a legacy compatibility path. Test: `t/yaml-directives.t`.
+3. **Multi-document plain scalars** — Plain scalars on a separate line after `---` are not
+   recognized as document boundaries (mappings and sequences work correctly).
+   Test: `t/yaml-multi-document.t`.
