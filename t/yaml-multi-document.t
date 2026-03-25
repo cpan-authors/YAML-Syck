@@ -136,13 +136,46 @@ YAML
 
 # --- Plain scalar on next line after --- (known parser limitation) ---
 
-TODO: {
-    local $TODO = 'parser does not split plain scalars on separate line after ---';
-
+{
     my $yaml = "---\nfoo\n---\nbar\n";
     my @docs = Load($yaml);
     is( scalar @docs, 2,
         'plain scalars on next line after --- parsed as separate documents' );
+    is( $docs[0], 'foo', 'first plain scalar document' );
+    is( $docs[1], 'bar', 'second plain scalar document' );
+}
+
+# --- Plain scalar terminated by document end marker (...) ---
+
+{
+    my $yaml = "---\nfoo\n...\n---\nbar\n";
+    my @docs = Load($yaml);
+    is( scalar @docs, 2,
+        'plain scalar terminated by ... then new document' );
+    is( $docs[0], 'foo', 'first doc before ...' );
+    is( $docs[1], 'bar', 'second doc after ...' );
+}
+
+# --- Multi-line plain scalar should still work ---
+
+{
+    my $yaml = "---\nfoo\n  bar\n  baz\n";
+    my @docs = Load($yaml);
+    is( scalar @docs, 1,
+        'indented continuation lines remain single document' );
+    is( $docs[0], 'foo bar baz',
+        'multi-line plain scalar folds correctly' );
+}
+
+# --- Three plain scalar documents ---
+
+{
+    my $yaml = "---\nalpha\n---\nbeta\n---\ngamma\n";
+    my @docs = Load($yaml);
+    is( scalar @docs, 3, 'three plain scalar documents' );
+    is( $docs[0], 'alpha', 'first of three' );
+    is( $docs[1], 'beta',  'second of three' );
+    is( $docs[2], 'gamma', 'third of three' );
 }
 
 done_testing();

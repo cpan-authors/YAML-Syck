@@ -1606,6 +1606,19 @@ yy113:
                             RETURN_IMPLICIT();
                         }
 
+                        /* Document boundary (--- or ...) at column 0
+                         * always terminates a plain scalar, regardless
+                         * of parentIndent level.
+                         */
+                        if ( YYCURSOR == YYLINEPTR &&
+                             ( ( YYCURSOR[0] == '-' && YYCURSOR[1] == '-' && YYCURSOR[2] == '-' ) ||
+                               ( YYCURSOR[0] == '.' && YYCURSOR[1] == '.' && YYCURSOR[2] == '.' ) ) &&
+                             ( YYCURSOR[3] == '\0' || YYCURSOR[3] == ' ' || YYCURSOR[3] == '\t' ||
+                               YYCURSOR[3] == '\n' || YYCURSOR[3] == '\r' ) )
+                        {
+                            RETURN_IMPLICIT();
+                        }
+
                         while ( YYTOKEN < YYCURSOR )
                         {
                             int nl_len = newline_len( YYTOKEN++ );
