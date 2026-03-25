@@ -55,8 +55,6 @@ static void syck_gram_error(void *parser_arg, const char *msg) {
 %type <nodeData>    implicit_map top_imp_map complex_key complex_value
 %type <nodeData>    complex_mapping in_implicit_map basic_mapping
 %type <nodeData>    inline_map in_inline_map inline_map_atom
-%type <nodeId>      indent_open
-
 %start doc
 
 %%
