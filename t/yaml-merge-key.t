@@ -17,9 +17,6 @@ use YAML::Syck;
 $YAML::Syck::ImplicitTyping = 1;
 
 # --- Basic merge ---
-# Note: The << merge key is recognized by implicit.c but the Perl handler
-# (perl_syck.h) stores it as a literal '<<' hash key rather than merging
-# the referenced mapping's keys into the parent. This is a known limitation.
 
 {
     my $yaml = <<'YAML';
@@ -35,14 +32,10 @@ YAML
     my $data = Load($yaml);
     is( $data->{item}{name}, 'widget',
         'merge: explicit key present' );
-
-    TODO: {
-        local $TODO = 'merge key << not implemented in Perl handler — stores as literal key';
-        is( $data->{item}{color}, 'red',
-            'merge: inherited key from anchor' );
-        is( $data->{item}{size}, 'large',
-            'merge: second inherited key from anchor' );
-    }
+    is( $data->{item}{color}, 'red',
+        'merge: inherited key from anchor' );
+    is( $data->{item}{size}, 'large',
+        'merge: second inherited key from anchor' );
 }
 
 # --- Merge with override ---
@@ -65,11 +58,8 @@ YAML
     is( $data->{item}{name}, 'widget',
         'merge override: additional explicit key present' );
 
-    TODO: {
-        local $TODO = 'merge key << not implemented in Perl handler — stores as literal key';
-        is( $data->{item}{size}, 'large',
-            'merge override: non-overridden key still inherited' );
-    }
+    is( $data->{item}{size}, 'large',
+        'merge override: non-overridden key still inherited' );
 }
 
 # --- Merge from multiple mappings ---
@@ -93,11 +83,54 @@ YAML
 
     is( $data->{combined}{e}, 5, 'multi-merge: explicit key present' );
 
-    TODO: {
-        local $TODO = 'merge from sequence of mappings not supported';
-        is( $data->{combined}{a}, 1, 'multi-merge: key from first base' );
-        is( $data->{combined}{c}, 3, 'multi-merge: key from second base' );
-    }
+    is( $data->{combined}{a}, 1, 'multi-merge: key from first base' );
+    is( $data->{combined}{b}, 2, 'multi-merge: all keys from first base' );
+    is( $data->{combined}{c}, 3, 'multi-merge: key from second base' );
+    is( $data->{combined}{d}, 4, 'multi-merge: all keys from second base' );
+}
+
+# --- Sequence merge: first mapping wins for duplicate keys ---
+
+{
+    my $yaml = <<'YAML';
+---
+base1: &base1
+  x: from-first
+  w: from-first
+
+base2: &base2
+  x: from-second
+  z: from-second
+
+merged:
+  <<: [*base1, *base2]
+YAML
+    my $data = Load($yaml);
+    is( $data->{merged}{x}, 'from-first',
+        'multi-merge precedence: first mapping wins for duplicate keys' );
+    is( $data->{merged}{w}, 'from-first',
+        'multi-merge precedence: unique key from first' );
+    is( $data->{merged}{z}, 'from-second',
+        'multi-merge precedence: unique key from second' );
+}
+
+# --- Merge does not store << as a key ---
+
+{
+    my $yaml = <<'YAML';
+---
+defaults: &defaults
+  a: 1
+
+item:
+  <<: *defaults
+  b: 2
+YAML
+    my $data = Load($yaml);
+    ok( !exists $data->{item}{'<<'},
+        'merge: << key is not stored in resulting hash' );
+    is_deeply( [sort keys %{$data->{item}}], ['a', 'b'],
+        'merge: only expected keys present' );
 }
 
 # --- Merge key without ImplicitTyping ---
@@ -115,9 +148,12 @@ item:
   name: widget
 YAML
     my $data = Load($yaml);
-    # Without ImplicitTyping, << might be treated as a literal key
-    # Test that the structure is still usable
-    ok( defined $data->{item}, 'merge key structure loads without ImplicitTyping' );
+    # Without ImplicitTyping, << is stored as a literal key
+    ok( defined $data->{item}, 'no implicit typing: structure loads' );
+    ok( exists $data->{item}{'<<'},
+        'no implicit typing: << stored as literal key' );
+    ok( !defined $data->{item}{color},
+        'no implicit typing: merged keys not expanded' );
 }
 
 # --- << as a plain string value (not merge context) ---

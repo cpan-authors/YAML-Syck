@@ -590,6 +590,9 @@ yaml_syck_parser_handler
 #endif
             {
                 /* load the map into a new HV and place a ref to it in the SV */
+#ifndef YAML_IS_JSON
+                AV *merge_values = NULL;
+#endif
                 map = newHV();
                 for (i = 0; i < n->data.pairs->idx; i++) {
                     SV* key = perl_syck_lookup_sym(p, syck_map_read(n, map_key, i));
@@ -601,10 +604,75 @@ yaml_syck_parser_handler
                     forward_anchor = is_bad_alias_object(val);
                     if (forward_anchor)
                         register_bad_alias(p, forward_anchor, val);
+
+                    /* YAML merge key (<<): defer merge processing until
+                     * all explicit keys are stored, so explicit keys
+                     * always take precedence over merged keys. */
+                    if (p->implicit_typing) {
+                        STRLEN klen;
+                        const char *kpv = SvPV(key, klen);
+                        if (klen == 2 && kpv[0] == '<' && kpv[1] == '<') {
+                            if (!merge_values)
+                                merge_values = newAV();
+                            SvREFCNT_inc(val);
+                            av_push(merge_values, val);
+                            continue;
+                        }
+                    }
 #endif
                     if (hv_store_ent(map, key, val, 0) != NULL)
                        USE_OBJECT(val);
                 }
+#ifndef YAML_IS_JSON
+                /* Apply merge keys: copy entries from referenced mappings
+                 * into the parent hash, skipping keys that already exist. */
+                if (merge_values) {
+                    long mi;
+                    for (mi = 0; mi <= av_len(merge_values); mi++) {
+                        SV **pmerge = av_fetch(merge_values, mi, 0);
+                        if (!pmerge) continue;
+                        if (SvROK(*pmerge) && SvTYPE(SvRV(*pmerge)) == SVt_PVHV) {
+                            /* <<: *alias (single mapping) */
+                            HV *merge_hv = (HV *)SvRV(*pmerge);
+                            HE *he;
+                            hv_iterinit(merge_hv);
+                            while ((he = hv_iternext(merge_hv))) {
+                                SV *hkey = hv_iterkeysv(he);
+                                if (!hv_exists_ent(map, hkey, 0)) {
+                                    SV *hval = hv_iterval(merge_hv, he);
+                                    SvREFCNT_inc(hval);
+                                    if (hv_store_ent(map, hkey, hval, 0) == NULL)
+                                        SvREFCNT_dec(hval);
+                                }
+                            }
+                        }
+                        else if (SvROK(*pmerge) && SvTYPE(SvRV(*pmerge)) == SVt_PVAV) {
+                            /* <<: [*a, *b] (sequence of mappings) */
+                            AV *merge_av = (AV *)SvRV(*pmerge);
+                            long ai;
+                            for (ai = 0; ai <= av_len(merge_av); ai++) {
+                                SV **pelem = av_fetch(merge_av, ai, 0);
+                                HV *elem_hv;
+                                HE *he;
+                                if (!pelem || !SvROK(*pelem) || SvTYPE(SvRV(*pelem)) != SVt_PVHV)
+                                    continue;
+                                elem_hv = (HV *)SvRV(*pelem);
+                                hv_iterinit(elem_hv);
+                                while ((he = hv_iternext(elem_hv))) {
+                                    SV *hkey = hv_iterkeysv(he);
+                                    if (!hv_exists_ent(map, hkey, 0)) {
+                                        SV *hval = hv_iterval(elem_hv, he);
+                                        SvREFCNT_inc(hval);
+                                        if (hv_store_ent(map, hkey, hval, 0) == NULL)
+                                            SvREFCNT_dec(hval);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    SvREFCNT_dec((SV *)merge_values);
+                }
+#endif
                 sv = newRV_noinc((SV*)map);
 #ifndef YAML_IS_JSON
                 if (id)  {
