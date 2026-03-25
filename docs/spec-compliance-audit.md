@@ -116,9 +116,3 @@ directive model.
 | Timestamps | `t/yaml-timestamps.t` (13 tests) | **Added — all pass** | None |
 | Directives (`%YAML`, `%TAG`) | `t/yaml-directives.t` (15 tests) | **Added — all pass** | `%TAG` directives skipped (not expanded); `%YAML` directives skipped |
 
-## Known Limitations (TODO'd tests)
-
-1. **`%TAG` directive skipped but not expanded** — The parser now correctly skips `%TAG` and
-   `%YAML` directive lines in the document header (they no longer corrupt the parse), but tag
-   prefix mappings from `%TAG` are not applied. Shorthand tags resolve using YAML 1.0 defaults.
-   Test: `t/yaml-directives.t`.
