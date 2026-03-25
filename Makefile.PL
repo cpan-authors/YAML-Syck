@@ -85,9 +85,11 @@ sub MY::postamble {
 .SUFFIXES:
 .SUFFIXES: .c .h .o .obj .xs
 
-# Regenerate gram.c and gram.h from gram.y (requires bison)
+# Regenerate gram.c and gram.h from gram.y (requires bison >= 3.0).
+# macOS ships bison 2.3; use Homebrew bison if available.
+BISON = $(shell command -v /opt/homebrew/opt/bison/bin/bison 2>/dev/null || command -v /usr/local/opt/bison/bin/bison 2>/dev/null || command -v /opt/homebrew/bin/bison 2>/dev/null || command -v /usr/local/bin/bison 2>/dev/null || echo bison)
 regen-grammar: gram.y
-	bison -o gram.c -d gram.y
+	$(BISON) -o gram.c -d gram.y
 MAKE
 }
 
