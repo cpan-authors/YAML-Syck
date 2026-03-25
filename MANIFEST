@@ -6,7 +6,6 @@ docs/spec-compliance-audit.md
 emitter.c
 gram.c
 gram.h
-gram.y
 handler.c
 implicit.c
 inc/ExtUtils/HasCompiler.pm
@@ -75,9 +74,9 @@ t/yaml-empty-collections.t
 t/yaml-equals-scalar.t
 t/yaml-implicit-typing.t
 t/yaml-implicit-warnings.t
+t/yaml-magic-vars.t
 t/yaml-merge-key.t
 t/yaml-multi-document.t
-t/yaml-magic-vars.t
 t/yaml-nested-flow.t
 t/yaml-roundtrip.t
 t/yaml-str-colon-first.t
