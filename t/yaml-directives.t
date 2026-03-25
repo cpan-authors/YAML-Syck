@@ -80,7 +80,7 @@ YAML
 # !shorthand tags resolve using YAML 1.0 defaults, not %TAG mappings.
 
 {
-    my $yaml = "%TAG ! tag:example.com,2000:\n---\n!foo bar\n";
+    my $yaml = "\%TAG ! tag:example.com,2000:\n---\n!foo bar\n";
     my $data = eval { Load($yaml) };
     ok( !$@, '%TAG directive does not cause parse error' );
     ok( defined $data && !ref($data),
@@ -92,7 +92,7 @@ YAML
 # --- Multiple %TAG directives ---
 
 {
-    my $yaml = "%TAG ! tag:example.com,2000:\n%TAG !! tag:yaml.org,2002:\n---\nkey: value\n";
+    my $yaml = "\%TAG ! tag:example.com,2000:\n\%TAG !! tag:yaml.org,2002:\n---\nkey: value\n";
     my $data = eval { Load($yaml) };
     ok( !$@, 'multiple %TAG directives do not cause parse error' );
     is( $data->{key}, 'value', 'document after multiple %TAG directives parses correctly' );
@@ -101,7 +101,7 @@ YAML
 # --- %YAML directive before document ---
 
 {
-    my $yaml = "%YAML 1.1\n---\nkey: value\n";
+    my $yaml = "\%YAML 1.1\n---\nkey: value\n";
     my $data = eval { Load($yaml) };
     ok( !$@, '%YAML directive before --- does not cause parse error' );
     is( $data->{key}, 'value', 'document after %YAML directive parses correctly' );
