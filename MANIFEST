@@ -2,7 +2,6 @@ bytecode.c
 Changes
 COMPATIBILITY
 COPYING
-docs/spec-compliance-audit.md
 emitter.c
 gram.c
 gram.h
