@@ -29,7 +29,7 @@ static void syck_gram_error(void *parser_arg, const char *msg) {
 
 %}
 
-%name-prefix "syck"
+%define api.prefix {syck}
 %define api.pure full
 %parse-param {void *parser}
 %lex-param {void *parser}
@@ -41,7 +41,7 @@ static void syck_gram_error(void *parser_arg, const char *msg) {
 }
 
 %code provides {
-    int sycklex( YYSTYPE *sycklval, SyckParser *parser );
+    int sycklex( SYCKSTYPE *sycklval, SyckParser *parser );
 }
 
 %token <name>       YAML_ANCHOR YAML_ALIAS YAML_TRANSFER YAML_TAGURI YAML_ITRANSFER

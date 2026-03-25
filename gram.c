@@ -63,7 +63,8 @@
 /* Pull parsers.  */
 #define YYPULL 1
 
-
+/* Substitute the type names.  */
+#define YYSTYPE         SYCKSTYPE
 /* Substitute the variable and function names.  */
 #define yyparse         syckparse
 #define yylex           sycklex
@@ -103,7 +104,7 @@ static void syck_gram_error(void *parser_arg, const char *msg) {
         }
 
 
-#line 107 "gram.c"
+#line 108 "gram.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -431,7 +432,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
-         || (defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
+         || (defined SYCKSTYPE_IS_TRIVIAL && SYCKSTYPE_IS_TRIVIAL)))
 
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
@@ -547,7 +548,7 @@ static const yytype_int8 yytranslate[] =
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14
 };
 
-#if YYDEBUG
+#if SYCKDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
@@ -566,7 +567,7 @@ static const yytype_int16 yyrline[] =
 /** Accessing symbol of state STATE.  */
 #define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
 
-#if YYDEBUG || 0
+#if SYCKDEBUG || 0
 /* The user-facing name of the symbol whose (internal) number is
    YYSYMBOL.  No bounds checking.  */
 static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
@@ -811,7 +812,7 @@ static const yytype_int8 yyr2[] =
 enum { YYENOMEM = -2 };
 
 #define yyerrok         (yyerrstatus = 0)
-#define yyclearin       (yychar = YYEMPTY)
+#define yyclearin       (yychar = SYCKEMPTY)
 
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
@@ -822,7 +823,7 @@ enum { YYENOMEM = -2 };
 
 #define YYBACKUP(Token, Value)                                    \
   do                                                              \
-    if (yychar == YYEMPTY)                                        \
+    if (yychar == SYCKEMPTY)                                        \
       {                                                           \
         yychar = (Token);                                         \
         yylval = (Value);                                         \
@@ -838,12 +839,12 @@ enum { YYENOMEM = -2 };
   while (0)
 
 /* Backward compatibility with an undocumented macro.
-   Use YYerror or YYUNDEF. */
-#define YYERRCODE YYUNDEF
+   Use SYCKerror or SYCKUNDEF. */
+#define YYERRCODE SYCKUNDEF
 
 
 /* Enable debugging if requested.  */
-#if YYDEBUG
+#if SYCKDEBUG
 
 # ifndef YYFPRINTF
 #  include <stdio.h> /* INFRINGES ON USER NAME SPACE */
@@ -969,12 +970,12 @@ do {                                    \
 /* Nonzero means print parse trace.  It is left uninitialized so that
    multiple parsers can coexist.  */
 int yydebug;
-#else /* !YYDEBUG */
+#else /* !SYCKDEBUG */
 # define YYDPRINTF(Args) ((void) 0)
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)
 # define YY_STACK_PRINT(Bottom, Top)
 # define YY_REDUCE_PRINT(Rule)
-#endif /* !YYDEBUG */
+#endif /* !SYCKDEBUG */
 
 
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
@@ -1081,7 +1082,7 @@ YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
-  yychar = YYEMPTY; /* Cause a token to be read.  */
+  yychar = SYCKEMPTY; /* Cause a token to be read.  */
   goto yysetstate;
 
 
@@ -1189,25 +1190,25 @@ yybackup:
   /* Not known => get a lookahead token if don't already have one.  */
 
   /* YYCHAR is either empty, or end-of-input, or a valid lookahead.  */
-  if (yychar == YYEMPTY)
+  if (yychar == SYCKEMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token\n"));
       yychar = yylex (&yylval, parser);
     }
 
-  if (yychar <= YYEOF)
+  if (yychar <= SYCKEOF)
     {
-      yychar = YYEOF;
+      yychar = SYCKEOF;
       yytoken = YYSYMBOL_YYEOF;
       YYDPRINTF ((stderr, "Now at end of input.\n"));
     }
-  else if (yychar == YYerror)
+  else if (yychar == SYCKerror)
     {
       /* The scanner already issued an error message, process directly
          to error recovery.  But do not keep the error token as
          lookahead, it is too special and may lead us to an endless
          loop in error recovery. */
-      yychar = YYUNDEF;
+      yychar = SYCKUNDEF;
       yytoken = YYSYMBOL_YYerror;
       goto yyerrlab1;
     }
@@ -1244,7 +1245,7 @@ yybackup:
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 
   /* Discard the shifted token.  */
-  yychar = YYEMPTY;
+  yychar = SYCKEMPTY;
   goto yynewstate;
 
 
@@ -1284,7 +1285,7 @@ yyreduce:
         {
            ((SyckParser *)parser)->root = syck_hdlr_add_node( (SyckParser *)parser, (yyvsp[0].nodeData) );
         }
-#line 1288 "gram.c"
+#line 1289 "gram.c"
     break;
 
   case 3: /* doc: YAML_DOCSEP atom_or_empty  */
@@ -1292,7 +1293,7 @@ yyreduce:
         {
            ((SyckParser *)parser)->root = syck_hdlr_add_node( (SyckParser *)parser, (yyvsp[0].nodeData) );
         }
-#line 1296 "gram.c"
+#line 1297 "gram.c"
     break;
 
   case 4: /* doc: %empty  */
@@ -1300,7 +1301,7 @@ yyreduce:
         {
            ((SyckParser *)parser)->eof = 1;
         }
-#line 1304 "gram.c"
+#line 1305 "gram.c"
     break;
 
   case 8: /* ind_rep: YAML_TRANSFER ind_rep  */
@@ -1309,7 +1310,7 @@ yyreduce:
             syck_add_transfer( (yyvsp[-1].name), (yyvsp[0].nodeData), ((SyckParser *)parser)->taguri_expansion );
             (yyval.nodeData) = (yyvsp[0].nodeData);
         }
-#line 1313 "gram.c"
+#line 1314 "gram.c"
     break;
 
   case 9: /* ind_rep: YAML_TAGURI ind_rep  */
@@ -1318,7 +1319,7 @@ yyreduce:
             syck_add_transfer( (yyvsp[-1].name), (yyvsp[0].nodeData), 0 );
             (yyval.nodeData) = (yyvsp[0].nodeData);
         }
-#line 1322 "gram.c"
+#line 1323 "gram.c"
     break;
 
   case 10: /* ind_rep: YAML_ANCHOR ind_rep  */
@@ -1331,7 +1332,7 @@ yyreduce:
             */
            (yyval.nodeData) = syck_hdlr_add_anchor( (SyckParser *)parser, (yyvsp[-1].name), (yyvsp[0].nodeData) );
         }
-#line 1335 "gram.c"
+#line 1336 "gram.c"
     break;
 
   case 11: /* ind_rep: YAML_ITRANSFER ind_rep  */
@@ -1343,7 +1344,7 @@ yyreduce:
            }
            (yyval.nodeData) = (yyvsp[0].nodeData);
         }
-#line 1347 "gram.c"
+#line 1348 "gram.c"
     break;
 
   case 12: /* ind_rep: indent_open ind_rep indent_flex_end  */
@@ -1351,7 +1352,7 @@ yyreduce:
         {
            (yyval.nodeData) = (yyvsp[-1].nodeData);
         }
-#line 1355 "gram.c"
+#line 1356 "gram.c"
     break;
 
   case 15: /* empty: indent_open empty indent_end  */
@@ -1359,7 +1360,7 @@ yyreduce:
         {
                     (yyval.nodeData) = (yyvsp[-1].nodeData);
                 }
-#line 1363 "gram.c"
+#line 1364 "gram.c"
     break;
 
   case 16: /* empty: %empty  */
@@ -1368,7 +1369,7 @@ yyreduce:
                     NULL_NODE( parser, n );
                     (yyval.nodeData) = n;
                 }
-#line 1372 "gram.c"
+#line 1373 "gram.c"
     break;
 
   case 17: /* empty: YAML_ITRANSFER empty  */
@@ -1380,7 +1381,7 @@ yyreduce:
                    }
                    (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1384 "gram.c"
+#line 1385 "gram.c"
     break;
 
   case 18: /* empty: YAML_TRANSFER empty  */
@@ -1389,7 +1390,7 @@ yyreduce:
                     syck_add_transfer( (yyvsp[-1].name), (yyvsp[0].nodeData), ((SyckParser *)parser)->taguri_expansion );
                     (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1393 "gram.c"
+#line 1394 "gram.c"
     break;
 
   case 19: /* empty: YAML_TAGURI empty  */
@@ -1398,7 +1399,7 @@ yyreduce:
                     syck_add_transfer( (yyvsp[-1].name), (yyvsp[0].nodeData), 0 );
                     (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1402 "gram.c"
+#line 1403 "gram.c"
     break;
 
   case 20: /* empty: YAML_ANCHOR empty  */
@@ -1411,7 +1412,7 @@ yyreduce:
                     */
                    (yyval.nodeData) = syck_hdlr_add_anchor( (SyckParser *)parser, (yyvsp[-1].name), (yyvsp[0].nodeData) );
                 }
-#line 1415 "gram.c"
+#line 1416 "gram.c"
     break;
 
   case 27: /* word_rep: YAML_TRANSFER word_rep  */
@@ -1420,7 +1421,7 @@ yyreduce:
                syck_add_transfer( (yyvsp[-1].name), (yyvsp[0].nodeData), ((SyckParser *)parser)->taguri_expansion );
                (yyval.nodeData) = (yyvsp[0].nodeData);
             }
-#line 1424 "gram.c"
+#line 1425 "gram.c"
     break;
 
   case 28: /* word_rep: YAML_TAGURI word_rep  */
@@ -1429,7 +1430,7 @@ yyreduce:
                syck_add_transfer( (yyvsp[-1].name), (yyvsp[0].nodeData), 0 );
                (yyval.nodeData) = (yyvsp[0].nodeData);
             }
-#line 1433 "gram.c"
+#line 1434 "gram.c"
     break;
 
   case 29: /* word_rep: YAML_ITRANSFER word_rep  */
@@ -1441,7 +1442,7 @@ yyreduce:
                }
                (yyval.nodeData) = (yyvsp[0].nodeData);
             }
-#line 1445 "gram.c"
+#line 1446 "gram.c"
     break;
 
   case 30: /* word_rep: YAML_ANCHOR word_rep  */
@@ -1449,7 +1450,7 @@ yyreduce:
         {
                (yyval.nodeData) = syck_hdlr_add_anchor( (SyckParser *)parser, (yyvsp[-1].name), (yyvsp[0].nodeData) );
             }
-#line 1453 "gram.c"
+#line 1454 "gram.c"
     break;
 
   case 31: /* word_rep: YAML_ALIAS  */
@@ -1461,7 +1462,7 @@ yyreduce:
                 */
                (yyval.nodeData) = syck_hdlr_get_anchor( (SyckParser *)parser, (yyvsp[0].name) );
             }
-#line 1465 "gram.c"
+#line 1466 "gram.c"
     break;
 
   case 32: /* word_rep: YAML_WORD  */
@@ -1478,7 +1479,7 @@ yyreduce:
                }
                (yyval.nodeData) = n;
             }
-#line 1482 "gram.c"
+#line 1483 "gram.c"
     break;
 
   case 34: /* word_rep: indent_open word_rep indent_flex_end  */
@@ -1486,7 +1487,7 @@ yyreduce:
         {
                (yyval.nodeData) = (yyvsp[-1].nodeData);
             }
-#line 1490 "gram.c"
+#line 1491 "gram.c"
     break;
 
   case 40: /* implicit_seq: indent_open top_imp_seq indent_end  */
@@ -1494,7 +1495,7 @@ yyreduce:
         {
                     (yyval.nodeData) = (yyvsp[-1].nodeData);
                 }
-#line 1498 "gram.c"
+#line 1499 "gram.c"
     break;
 
   case 41: /* implicit_seq: indent_open in_implicit_seq indent_end  */
@@ -1502,7 +1503,7 @@ yyreduce:
         {
                     (yyval.nodeData) = (yyvsp[-1].nodeData);
                 }
-#line 1506 "gram.c"
+#line 1507 "gram.c"
     break;
 
   case 42: /* basic_seq: '-' atom_or_empty  */
@@ -1510,7 +1511,7 @@ yyreduce:
         {
                     (yyval.nodeId) = syck_hdlr_add_node( (SyckParser *)parser, (yyvsp[0].nodeData) );
                 }
-#line 1514 "gram.c"
+#line 1515 "gram.c"
     break;
 
   case 43: /* top_imp_seq: YAML_TRANSFER indent_sep in_implicit_seq  */
@@ -1519,7 +1520,7 @@ yyreduce:
                     syck_add_transfer( (yyvsp[-2].name), (yyvsp[0].nodeData), ((SyckParser *)parser)->taguri_expansion );
                     (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1523 "gram.c"
+#line 1524 "gram.c"
     break;
 
   case 44: /* top_imp_seq: YAML_TRANSFER top_imp_seq  */
@@ -1528,7 +1529,7 @@ yyreduce:
                     syck_add_transfer( (yyvsp[-1].name), (yyvsp[0].nodeData), ((SyckParser *)parser)->taguri_expansion );
                     (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1532 "gram.c"
+#line 1533 "gram.c"
     break;
 
   case 45: /* top_imp_seq: YAML_TAGURI indent_sep in_implicit_seq  */
@@ -1537,7 +1538,7 @@ yyreduce:
                     syck_add_transfer( (yyvsp[-2].name), (yyvsp[0].nodeData), 0 );
                     (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1541 "gram.c"
+#line 1542 "gram.c"
     break;
 
   case 46: /* top_imp_seq: YAML_TAGURI top_imp_seq  */
@@ -1546,7 +1547,7 @@ yyreduce:
                     syck_add_transfer( (yyvsp[-1].name), (yyvsp[0].nodeData), 0 );
                     (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1550 "gram.c"
+#line 1551 "gram.c"
     break;
 
   case 47: /* top_imp_seq: YAML_ANCHOR indent_sep in_implicit_seq  */
@@ -1554,7 +1555,7 @@ yyreduce:
         {
                     (yyval.nodeData) = syck_hdlr_add_anchor( (SyckParser *)parser, (yyvsp[-2].name), (yyvsp[0].nodeData) );
                 }
-#line 1558 "gram.c"
+#line 1559 "gram.c"
     break;
 
   case 48: /* top_imp_seq: YAML_ANCHOR top_imp_seq  */
@@ -1562,7 +1563,7 @@ yyreduce:
         {
                     (yyval.nodeData) = syck_hdlr_add_anchor( (SyckParser *)parser, (yyvsp[-1].name), (yyvsp[0].nodeData) );
                 }
-#line 1566 "gram.c"
+#line 1567 "gram.c"
     break;
 
   case 49: /* in_implicit_seq: basic_seq  */
@@ -1570,7 +1571,7 @@ yyreduce:
         {
                     (yyval.nodeData) = syck_new_seq( (yyvsp[0].nodeId) );
                 }
-#line 1574 "gram.c"
+#line 1575 "gram.c"
     break;
 
   case 50: /* in_implicit_seq: in_implicit_seq indent_sep basic_seq  */
@@ -1579,7 +1580,7 @@ yyreduce:
                     syck_seq_add( (yyvsp[-2].nodeData), (yyvsp[0].nodeId) );
                     (yyval.nodeData) = (yyvsp[-2].nodeData);
                                 }
-#line 1583 "gram.c"
+#line 1584 "gram.c"
     break;
 
   case 51: /* in_implicit_seq: in_implicit_seq indent_sep  */
@@ -1587,7 +1588,7 @@ yyreduce:
         {
                     (yyval.nodeData) = (yyvsp[-1].nodeData);
                                 }
-#line 1591 "gram.c"
+#line 1592 "gram.c"
     break;
 
   case 52: /* inline_seq: '[' in_inline_seq ']'  */
@@ -1595,7 +1596,7 @@ yyreduce:
         {
                     (yyval.nodeData) = (yyvsp[-1].nodeData);
                 }
-#line 1599 "gram.c"
+#line 1600 "gram.c"
     break;
 
   case 53: /* inline_seq: '[' ']'  */
@@ -1603,7 +1604,7 @@ yyreduce:
         {
                     (yyval.nodeData) = syck_alloc_seq();
                 }
-#line 1607 "gram.c"
+#line 1608 "gram.c"
     break;
 
   case 54: /* in_inline_seq: inline_seq_atom  */
@@ -1611,7 +1612,7 @@ yyreduce:
         {
                     (yyval.nodeData) = syck_new_seq( syck_hdlr_add_node( (SyckParser *)parser, (yyvsp[0].nodeData) ) );
                 }
-#line 1615 "gram.c"
+#line 1616 "gram.c"
     break;
 
   case 55: /* in_inline_seq: in_inline_seq ',' inline_seq_atom  */
@@ -1620,7 +1621,7 @@ yyreduce:
                     syck_seq_add( (yyvsp[-2].nodeData), syck_hdlr_add_node( (SyckParser *)parser, (yyvsp[0].nodeData) ) );
                     (yyval.nodeData) = (yyvsp[-2].nodeData);
                                 }
-#line 1624 "gram.c"
+#line 1625 "gram.c"
     break;
 
   case 58: /* implicit_map: indent_open top_imp_map indent_end  */
@@ -1629,7 +1630,7 @@ yyreduce:
                     apply_seq_in_map( (SyckParser *)parser, (yyvsp[-1].nodeData) );
                     (yyval.nodeData) = (yyvsp[-1].nodeData);
                 }
-#line 1633 "gram.c"
+#line 1634 "gram.c"
     break;
 
   case 59: /* implicit_map: indent_open in_implicit_map indent_end  */
@@ -1638,7 +1639,7 @@ yyreduce:
                     apply_seq_in_map( (SyckParser *)parser, (yyvsp[-1].nodeData) );
                     (yyval.nodeData) = (yyvsp[-1].nodeData);
                 }
-#line 1642 "gram.c"
+#line 1643 "gram.c"
     break;
 
   case 60: /* top_imp_map: YAML_TRANSFER indent_sep in_implicit_map  */
@@ -1647,7 +1648,7 @@ yyreduce:
                     syck_add_transfer( (yyvsp[-2].name), (yyvsp[0].nodeData), ((SyckParser *)parser)->taguri_expansion );
                     (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1651 "gram.c"
+#line 1652 "gram.c"
     break;
 
   case 61: /* top_imp_map: YAML_TRANSFER top_imp_map  */
@@ -1656,7 +1657,7 @@ yyreduce:
                     syck_add_transfer( (yyvsp[-1].name), (yyvsp[0].nodeData), ((SyckParser *)parser)->taguri_expansion );
                     (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1660 "gram.c"
+#line 1661 "gram.c"
     break;
 
   case 62: /* top_imp_map: YAML_TAGURI indent_sep in_implicit_map  */
@@ -1665,7 +1666,7 @@ yyreduce:
                     syck_add_transfer( (yyvsp[-2].name), (yyvsp[0].nodeData), 0 );
                     (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1669 "gram.c"
+#line 1670 "gram.c"
     break;
 
   case 63: /* top_imp_map: YAML_TAGURI top_imp_map  */
@@ -1674,7 +1675,7 @@ yyreduce:
                     syck_add_transfer( (yyvsp[-1].name), (yyvsp[0].nodeData), 0 );
                     (yyval.nodeData) = (yyvsp[0].nodeData);
                 }
-#line 1678 "gram.c"
+#line 1679 "gram.c"
     break;
 
   case 64: /* top_imp_map: YAML_ANCHOR indent_sep in_implicit_map  */
@@ -1682,7 +1683,7 @@ yyreduce:
         {
                     (yyval.nodeData) = syck_hdlr_add_anchor( (SyckParser *)parser, (yyvsp[-2].name), (yyvsp[0].nodeData) );
                 }
-#line 1686 "gram.c"
+#line 1687 "gram.c"
     break;
 
   case 65: /* top_imp_map: YAML_ANCHOR top_imp_map  */
@@ -1690,7 +1691,7 @@ yyreduce:
         {
                     (yyval.nodeData) = syck_hdlr_add_anchor( (SyckParser *)parser, (yyvsp[-1].name), (yyvsp[0].nodeData) );
                 }
-#line 1694 "gram.c"
+#line 1695 "gram.c"
     break;
 
   case 67: /* complex_key: '?' atom indent_sep  */
@@ -1698,7 +1699,7 @@ yyreduce:
         {
                     (yyval.nodeData) = (yyvsp[-1].nodeData);
                 }
-#line 1702 "gram.c"
+#line 1703 "gram.c"
     break;
 
   case 69: /* complex_mapping: complex_key ':' complex_value  */
@@ -1708,7 +1709,7 @@ yyreduce:
                         syck_hdlr_add_node( (SyckParser *)parser, (yyvsp[-2].nodeData) ),
                         syck_hdlr_add_node( (SyckParser *)parser, (yyvsp[0].nodeData) ) );
                 }
-#line 1712 "gram.c"
+#line 1713 "gram.c"
     break;
 
   case 71: /* in_implicit_map: in_implicit_map indent_sep basic_seq  */
@@ -1724,7 +1725,7 @@ yyreduce:
                     }
                     (yyval.nodeData) = (yyvsp[-2].nodeData);
                 }
-#line 1728 "gram.c"
+#line 1729 "gram.c"
     break;
 
   case 72: /* in_implicit_map: in_implicit_map indent_sep complex_mapping  */
@@ -1736,7 +1737,7 @@ yyreduce:
                     (yyvsp[0].nodeData) = NULL;
                     (yyval.nodeData) = (yyvsp[-2].nodeData);
                 }
-#line 1740 "gram.c"
+#line 1741 "gram.c"
     break;
 
   case 73: /* in_implicit_map: in_implicit_map indent_sep  */
@@ -1744,7 +1745,7 @@ yyreduce:
         {
                     (yyval.nodeData) = (yyvsp[-1].nodeData);
                 }
-#line 1748 "gram.c"
+#line 1749 "gram.c"
     break;
 
   case 74: /* basic_mapping: atom ':' atom_or_empty  */
@@ -1754,7 +1755,7 @@ yyreduce:
                         syck_hdlr_add_node( (SyckParser *)parser, (yyvsp[-2].nodeData) ),
                         syck_hdlr_add_node( (SyckParser *)parser, (yyvsp[0].nodeData) ) );
                 }
-#line 1758 "gram.c"
+#line 1759 "gram.c"
     break;
 
   case 75: /* inline_map: '{' in_inline_map '}'  */
@@ -1762,7 +1763,7 @@ yyreduce:
         {
                     (yyval.nodeData) = (yyvsp[-1].nodeData);
                 }
-#line 1766 "gram.c"
+#line 1767 "gram.c"
     break;
 
   case 76: /* inline_map: '{' '}'  */
@@ -1770,7 +1771,7 @@ yyreduce:
         {
                     (yyval.nodeData) = syck_alloc_map();
                 }
-#line 1774 "gram.c"
+#line 1775 "gram.c"
     break;
 
   case 78: /* in_inline_map: in_inline_map ',' inline_map_atom  */
@@ -1781,7 +1782,7 @@ yyreduce:
                     (yyvsp[0].nodeData) = NULL;
                     (yyval.nodeData) = (yyvsp[-2].nodeData);
                                 }
-#line 1785 "gram.c"
+#line 1786 "gram.c"
     break;
 
   case 79: /* inline_map_atom: atom  */
@@ -1792,11 +1793,11 @@ yyreduce:
                         syck_hdlr_add_node( (SyckParser *)parser, (yyvsp[0].nodeData) ),
                         syck_hdlr_add_node( (SyckParser *)parser, n ) );
                 }
-#line 1796 "gram.c"
+#line 1797 "gram.c"
     break;
 
 
-#line 1800 "gram.c"
+#line 1801 "gram.c"
 
       default: break;
     }
@@ -1838,7 +1839,7 @@ yyreduce:
 yyerrlab:
   /* Make sure we have latest lookahead translation.  See comments at
      user semantic actions for why this is necessary.  */
-  yytoken = yychar == YYEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
+  yytoken = yychar == SYCKEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
   /* If not already recovering from an error, report this error.  */
   if (!yyerrstatus)
     {
@@ -1851,17 +1852,17 @@ yyerrlab:
       /* If just tried and failed to reuse lookahead token after an
          error, discard it.  */
 
-      if (yychar <= YYEOF)
+      if (yychar <= SYCKEOF)
         {
           /* Return failure if at end of input.  */
-          if (yychar == YYEOF)
+          if (yychar == SYCKEOF)
             YYABORT;
         }
       else
         {
           yydestruct ("Error: discarding",
                       yytoken, &yylval, parser);
-          yychar = YYEMPTY;
+          yychar = SYCKEMPTY;
         }
     }
 
@@ -1964,7 +1965,7 @@ yyexhaustedlab:
 | yyreturn -- parsing is finished, clean up and return.  |
 `-------------------------------------------------------*/
 yyreturn:
-  if (yychar != YYEMPTY)
+  if (yychar != SYCKEMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at
          user semantic actions for why this is necessary.  */
