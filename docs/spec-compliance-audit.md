@@ -120,6 +120,3 @@ directive model.
 
 1. **`%TAG` directive not parsed** — The parser treats `%TAG` lines as content, not directives.
    The `%YAML:1.0` directive is handled via a legacy compatibility path. Test: `t/yaml-directives.t`.
-2. **Multi-document plain scalars** — Plain scalars on a separate line after `---` are not
-   recognized as document boundaries (mappings and sequences work correctly).
-   Test: `t/yaml-multi-document.t`.
