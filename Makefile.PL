@@ -81,9 +81,12 @@ sub MY::postamble {
     return <<'MAKE';
 # Cancel make's built-in yacc/bison rules so gram.y is never compiled
 # automatically.  gram.c and gram.h are pre-generated and checked in.
-# Cancel GNU make pattern rule and POSIX suffix rule:
+# Cancel GNU make pattern rule (no-op recipe):
 %.c: %.y
+	@:
+# Cancel POSIX suffix rule (no-op recipe):
 .y.c:
+	@:
 
 # Regenerate gram.c and gram.h from gram.y (requires bison)
 regen-grammar: gram.y
