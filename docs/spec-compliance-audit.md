@@ -33,7 +33,7 @@ YAML-Syck declares itself a YAML 1.0 parser (`syck.h` defines `SYCK_YAML_MAJOR=1
 | Implicit Typing | Float (special: inf/nan) | `t/yaml-implicit-typing.t`, `t/gh-26-implicit-type-roundtrip.t` | Covered | None | `.inf`, `.nan` and case variants |
 | Implicit Typing | Float (base-60) | `t/yaml-implicit-typing.t` | Covered | None (1.0) | `1:30.5`=90.5 — 1.0 feature |
 | Implicit Typing | Integers with commas (`1,000`) | `t/yaml-implicit-typing.t` (not-integer check) | Partial | None (1.0) | `1,000` not tested as integer; `implicit.c` supports commas via `syck_str_blow_away_commas()` |
-| Implicit Typing | Merge key (`<<`) | — | **Missing** | N/A | `implicit.c` returns "merge" type; Perl handler processes it. New: `t/yaml-merge-key.t` |
+| Implicit Typing | Merge key (`<<`) | `t/yaml-merge-key.t` (20 tests) | Covered | None | Single mapping merge, sequence-of-mappings merge, override precedence, ImplicitTyping gate |
 | Implicit Typing | Timestamps | — | **Missing** | N/A | Not tested. `implicit.c` recognizes timestamp patterns. New: `t/yaml-timestamps.t` |
 | **Anchors & Aliases** | | | | | |
 | Anchors | `&anchor` / `*alias` | `t/yaml-alias.t`, `t/1-basic.t`, `t/2-scalars.t` | Covered | None | Scalars, arrays, hashes, circular refs |
@@ -112,17 +112,14 @@ directive model.
 | Block scalars (literal, folded, chomping) | `t/yaml-block-scalars.t` (13 tests) | **Added — all pass** | None |
 | Multi-document streams and `...` marker | `t/yaml-multi-document.t` (23 tests) | **Added — all pass** | Plain scalars on next line after `---` not split (TODO) |
 | Comments | `t/yaml-comments.t` (9 tests) | **Added — all pass** | None |
-| Merge key (`<<`) | `t/yaml-merge-key.t` (11 tests) | **Added — pass with TODOs** | `<<` stored as literal key, not merged (TODO). Sequence merge unsupported (TODO). |
+| Merge key (`<<`) | `t/yaml-merge-key.t` (20 tests) | **Added — all pass** | None |
 | Timestamps | `t/yaml-timestamps.t` (13 tests) | **Added — all pass** | None |
 | Directives (`%YAML`, `%TAG`) | `t/yaml-directives.t` (9 tests) | **Added — pass with TODO** | `%TAG` directive not parsed (TODO) |
 
 ## Known Limitations (TODO'd tests)
 
-1. **Merge key (`<<`) not implemented** — `implicit.c` recognizes `<<` as the merge type,
-   but `perl_syck.h` stores it as a literal `<<` hash key rather than merging the referenced
-   mapping's keys into the parent. Test: `t/yaml-merge-key.t`.
-2. **`%TAG` directive not parsed** — The parser treats `%TAG` lines as content, not directives.
+1. **`%TAG` directive not parsed** — The parser treats `%TAG` lines as content, not directives.
    The `%YAML:1.0` directive is handled via a legacy compatibility path. Test: `t/yaml-directives.t`.
-3. **Multi-document plain scalars** — Plain scalars on a separate line after `---` are not
+2. **Multi-document plain scalars** — Plain scalars on a separate line after `---` are not
    recognized as document boundaries (mappings and sequences work correctly).
    Test: `t/yaml-multi-document.t`.
