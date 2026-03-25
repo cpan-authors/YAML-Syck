@@ -6,6 +6,7 @@ docs/spec-compliance-audit.md
 emitter.c
 gram.c
 gram.h
+gram.y
 handler.c
 implicit.c
 inc/ExtUtils/HasCompiler.pm
