@@ -316,14 +316,22 @@ yaml_syck_parser_handler
                 ENTER;
                 SAVETMPS;
 
-                cv = eval_pv(SvPV_nolen(sub), TRUE);
-
                 sv_2mortal(sub);
+
+                cv = eval_pv(SvPV_nolen(sub), FALSE);
+
+                if (SvTRUE(ERRSV)) {
+                    FREETMPS;
+                    LEAVE;
+                    croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(ERRSV));
+                }
 
                 if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
                     sv = cv;
                 }
                 else {
+                    FREETMPS;
+                    LEAVE;
                     croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub));
                 }
 
