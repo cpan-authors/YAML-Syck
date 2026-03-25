@@ -38,22 +38,30 @@
 #ifndef YY_SYCK_GRAM_H_INCLUDED
 # define YY_SYCK_GRAM_H_INCLUDED
 /* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
+#ifndef SYCKDEBUG
+# if defined YYDEBUG
 #if YYDEBUG
+#   define SYCKDEBUG 1
+#  else
+#   define SYCKDEBUG 0
+#  endif
+# else /* ! defined YYDEBUG */
+#  define SYCKDEBUG 0
+# endif /* ! defined YYDEBUG */
+#endif  /* ! defined SYCKDEBUG */
+#if SYCKDEBUG
 extern int syckdebug;
 #endif
 
 /* Token kinds.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-  enum yytokentype
+#ifndef SYCKTOKENTYPE
+# define SYCKTOKENTYPE
+  enum sycktokentype
   {
-    YYEMPTY = -2,
-    YYEOF = 0,                     /* "end of file"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
+    SYCKEMPTY = -2,
+    SYCKEOF = 0,                   /* "end of file"  */
+    SYCKerror = 256,               /* error  */
+    SYCKUNDEF = 257,               /* "invalid token"  */
     YAML_ANCHOR = 258,             /* YAML_ANCHOR  */
     YAML_ALIAS = 259,              /* YAML_ALIAS  */
     YAML_TRANSFER = 260,           /* YAML_TRANSFER  */
@@ -67,12 +75,12 @@ extern int syckdebug;
     YAML_INDENT = 268,             /* YAML_INDENT  */
     YAML_IEND = 269                /* YAML_IEND  */
   };
-  typedef enum yytokentype yytoken_kind_t;
+  typedef enum sycktokentype sycktoken_kind_t;
 #endif
 
 /* Value type.  */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
+#if ! defined SYCKSTYPE && ! defined SYCKSTYPE_IS_DECLARED
+union SYCKSTYPE
 {
 #line 37 "gram.y"
 
@@ -80,12 +88,12 @@ union YYSTYPE
     SyckNode *nodeData;
     char *name;
 
-#line 84 "gram.h"
+#line 92 "gram.h"
 
 };
-typedef union YYSTYPE YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define YYSTYPE_IS_DECLARED 1
+typedef union SYCKSTYPE SYCKSTYPE;
+# define SYCKSTYPE_IS_TRIVIAL 1
+# define SYCKSTYPE_IS_DECLARED 1
 #endif
 
 
@@ -94,8 +102,8 @@ int syckparse (void *parser);
 /* "%code provides" blocks.  */
 #line 43 "gram.y"
 
-    int sycklex( YYSTYPE *sycklval, SyckParser *parser );
+    int sycklex( SYCKSTYPE *sycklval, SyckParser *parser );
 
-#line 100 "gram.h"
+#line 108 "gram.h"
 
 #endif /* !YY_SYCK_GRAM_H_INCLUDED  */

@@ -239,8 +239,8 @@ void eat_comments( SyckParser * );
 char escape_seq( char );
 int is_newline( char *ptr );
 int newline_len( char *ptr );
-int sycklex_yaml_utf8( YYSTYPE *, SyckParser * );
-int sycklex_bytecode_utf8( YYSTYPE *, SyckParser * );
+int sycklex_yaml_utf8( SYCKSTYPE *, SyckParser * );
+int sycklex_bytecode_utf8( SYCKSTYPE *, SyckParser * );
 int syckwrap(void);
 
 /*
@@ -249,7 +249,7 @@ int syckwrap(void);
  * It's really nice to not rely on backtracking and such.
  */
 int
-sycklex( YYSTYPE *sycklval, SyckParser *parser )
+sycklex( SYCKSTYPE *sycklval, SyckParser *parser )
 {
     switch ( parser->input_type )
     {
@@ -274,7 +274,7 @@ sycklex( YYSTYPE *sycklval, SyckParser *parser )
  * Parser for standard YAML [UTF-8]
  */
 int
-sycklex_yaml_utf8( YYSTYPE *sycklval, SyckParser *parser )
+sycklex_yaml_utf8( SYCKSTYPE *sycklval, SyckParser *parser )
 {
     int doc_level = 0;
     syck_parser_ptr = parser;
