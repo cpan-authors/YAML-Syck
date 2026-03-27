@@ -1034,6 +1034,7 @@ yaml_syck_emitter_handler
     if (sv_isobject(sv)) {
         ref = savepv(sv_reftype(SvRV(sv), TRUE));
         ref_orig = ref;
+        bonus->cur_ref = ref;  /* track for cleanup on croak */
         *tag = '\0';
         strcat(tag, OBJECT_TAG);
 
@@ -1138,6 +1139,7 @@ yaml_syck_emitter_handler
                 syck_emitter_write(e, an, strlen(anchor_name) + 1);
                 S_FREE(an);
                 Safefree(ref_orig);
+                bonus->cur_ref = NULL;
                 return;
             }
         }
@@ -1416,9 +1418,34 @@ yaml_syck_emitter_handler
 #ifndef YAML_IS_JSON
     if (ref_orig != NULL) {
         Safefree(ref_orig);
+        bonus->cur_ref = NULL;  /* already freed — prevent double-free in destructor */
     }
 #endif
 }
+
+/* Destructor for SAVEDESTRUCTOR_X: frees emitter and tag buffer on croak.
+ * Registered after allocation so Perl's scope unwinding handles cleanup
+ * even when a croak() longjmps past the normal return path.
+ * Guarded because perl_syck.h is included twice (YAML and JSON modes). */
+#ifndef CLEANUP_EMITTER_BONUS_DEFINED
+#define CLEANUP_EMITTER_BONUS_DEFINED
+static void
+cleanup_emitter_bonus(void *p) {
+    struct emitter_xtra *bonus = (struct emitter_xtra *)p;
+    if (bonus->cur_ref != NULL) {
+        Safefree(bonus->cur_ref);
+        bonus->cur_ref = NULL;
+    }
+    if (bonus->emitter != NULL) {
+        syck_free_emitter((SyckEmitter *)bonus->emitter);
+        bonus->emitter = NULL;
+    }
+    if (bonus->tag != NULL) {
+        Safefree(bonus->tag);
+        bonus->tag = NULL;
+    }
+}
+#endif
 
 void
 #ifdef YAML_IS_JSON
@@ -1477,7 +1504,13 @@ DumpYAMLImpl
     *(bonus->tag) = '\0';
     bonus->dump_code = SvTRUE(use_code) || SvTRUE(dump_code);
     bonus->implicit_binary = SvTRUE(implicit_binary);
+    bonus->emitter = emitter;
+    bonus->cur_ref = NULL;
     emitter->bonus = bonus;
+
+    /* Register destructor so croak() in callbacks (mark_emitter,
+     * emitter_handler) won't leak the emitter or tag buffer. */
+    SAVEDESTRUCTOR_X(cleanup_emitter_bonus, bonus);
 
     syck_emitter_handler( emitter, PERL_SYCK_EMITTER_HANDLER );
     syck_output_handler( emitter, output_handler );
@@ -1491,9 +1524,13 @@ DumpYAMLImpl
 
     syck_emit( emitter, (st_data_t)sv );
     syck_emitter_flush( emitter, 0 );
-    syck_free_emitter( emitter );
 
+    /* Normal path: clean up now and NULL the pointers so the
+     * SAVEDESTRUCTOR_X callback (at LEAVE) becomes a no-op. */
+    syck_free_emitter( emitter );
+    bonus->emitter = NULL;
     Safefree(bonus->tag);
+    bonus->tag = NULL;
 
     FREETMPS; LEAVE;
 
