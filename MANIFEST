@@ -56,6 +56,7 @@ t/json-null.t
 t/json-numbers.t
 t/json-refs.t
 t/json-singlequote.t
+t/croak-leak.t
 t/leak.t
 t/load-blessed.t
 t/str-type-regression.t

@@ -335,7 +335,7 @@ yaml_syck_parser_handler
                     croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub));
                 }
 
-                SvREFCNT_inc(sv); /* XXX seems to be necessary */
+                SvREFCNT_inc(sv); /* prevent FREETMPS from freeing the mortal cv */
 
                 FREETMPS;
                 LEAVE;
@@ -869,7 +869,7 @@ static SV * LoadYAML (char *s) {
     ENTER; SAVETMPS;
 
     /* Don't even bother if the string is empty. */
-    if (*s == '\0') { return &PL_sv_undef; }
+    if (*s == '\0') { FREETMPS; LEAVE; return &PL_sv_undef; }
 
 #ifdef YAML_IS_JSON
     s = perl_json_preprocess(s);
@@ -1034,6 +1034,7 @@ yaml_syck_emitter_handler
     if (sv_isobject(sv)) {
         ref = savepv(sv_reftype(SvRV(sv), TRUE));
         ref_orig = ref;
+        bonus->cur_ref = ref;  /* track for cleanup on croak */
         *tag = '\0';
         strcat(tag, OBJECT_TAG);
 
@@ -1138,6 +1139,7 @@ yaml_syck_emitter_handler
                 syck_emitter_write(e, an, strlen(anchor_name) + 1);
                 S_FREE(an);
                 Safefree(ref_orig);
+                bonus->cur_ref = NULL;
                 return;
             }
         }
@@ -1416,9 +1418,34 @@ yaml_syck_emitter_handler
 #ifndef YAML_IS_JSON
     if (ref_orig != NULL) {
         Safefree(ref_orig);
+        bonus->cur_ref = NULL;  /* already freed — prevent double-free in destructor */
     }
 #endif
 }
+
+/* Destructor for SAVEDESTRUCTOR_X: frees emitter and tag buffer on croak.
+ * Registered after allocation so Perl's scope unwinding handles cleanup
+ * even when a croak() longjmps past the normal return path.
+ * Guarded because perl_syck.h is included twice (YAML and JSON modes). */
+#ifndef CLEANUP_EMITTER_BONUS_DEFINED
+#define CLEANUP_EMITTER_BONUS_DEFINED
+static void
+cleanup_emitter_bonus(void *p) {
+    struct emitter_xtra *bonus = (struct emitter_xtra *)p;
+    if (bonus->cur_ref != NULL) {
+        Safefree(bonus->cur_ref);
+        bonus->cur_ref = NULL;
+    }
+    if (bonus->emitter != NULL) {
+        syck_free_emitter((SyckEmitter *)bonus->emitter);
+        bonus->emitter = NULL;
+    }
+    if (bonus->tag != NULL) {
+        Safefree(bonus->tag);
+        bonus->tag = NULL;
+    }
+}
+#endif
 
 void
 #ifdef YAML_IS_JSON
@@ -1427,7 +1454,7 @@ DumpJSONImpl
 DumpYAMLImpl
 #endif
 (SV *sv, struct emitter_xtra *bonus, SyckOutputHandler output_handler) {
-    SyckEmitter *emitter = syck_new_emitter();
+    SyckEmitter *emitter;
     SV *headless         = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
     SV *implicit_binary  = GvSV(gv_fetchpv(form("%s::ImplicitBinary", PACKAGE_NAME), TRUE, SVt_PV));
     SV *use_code         = GvSV(gv_fetchpv(form("%s::UseCode", PACKAGE_NAME), TRUE, SVt_PV));
@@ -1438,9 +1465,6 @@ DumpYAMLImpl
     SV *max_depth        = GvSV(gv_fetchpv(form("%s::MaxDepth", PACKAGE_NAME), TRUE, SVt_PV));
     json_quote_char      = (SvTRUE(singlequote) ? '\'' : '"' );
     json_quote_style     = (SvTRUE(singlequote) ? scalar_2quote_1 : scalar_2quote );
-    emitter->indent      = PERL_SYCK_INDENT_LEVEL;
-    emitter->max_depth   = SvIOK(max_depth) ? SvIV(max_depth) : json_max_depth;
-    emitter->json_mode   = 1;
 #else
     SV *singlequote      = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
     yaml_quote_style     = (SvTRUE(singlequote) ? scalar_1quote : scalar_none);
@@ -1448,6 +1472,8 @@ DumpYAMLImpl
 
     ENTER; SAVETMPS;
 
+    /* Initialize B::Deparse BEFORE allocating the emitter, so that if
+     * eval_pv croaks (longjmp) we don't leak the SyckEmitter. */
 #ifndef YAML_IS_JSON
     if (SvTRUE(use_code) || SvTRUE(dump_code)) {
         SV *bdeparse = GvSV(gv_fetchpv(form("%s::DeparseObject", PACKAGE_NAME), TRUE, SVt_PV));
@@ -1461,6 +1487,14 @@ DumpYAMLImpl
     }
 #endif
 
+    emitter = syck_new_emitter();
+
+#ifdef YAML_IS_JSON
+    emitter->indent      = PERL_SYCK_INDENT_LEVEL;
+    emitter->max_depth   = SvIOK(max_depth) ? SvIV(max_depth) : json_max_depth;
+    emitter->json_mode   = 1;
+#endif
+
     emitter->headless = SvTRUE(headless);
     emitter->sort_keys = SvTRUE(sortkeys);
     emitter->anchor_format = "%d";
@@ -1470,7 +1504,13 @@ DumpYAMLImpl
     *(bonus->tag) = '\0';
     bonus->dump_code = SvTRUE(use_code) || SvTRUE(dump_code);
     bonus->implicit_binary = SvTRUE(implicit_binary);
+    bonus->emitter = emitter;
+    bonus->cur_ref = NULL;
     emitter->bonus = bonus;
+
+    /* Register destructor so croak() in callbacks (mark_emitter,
+     * emitter_handler) won't leak the emitter or tag buffer. */
+    SAVEDESTRUCTOR_X(cleanup_emitter_bonus, bonus);
 
     syck_emitter_handler( emitter, PERL_SYCK_EMITTER_HANDLER );
     syck_output_handler( emitter, output_handler );
@@ -1484,9 +1524,13 @@ DumpYAMLImpl
 
     syck_emit( emitter, (st_data_t)sv );
     syck_emitter_flush( emitter, 0 );
-    syck_free_emitter( emitter );
 
+    /* Normal path: clean up now and NULL the pointers so the
+     * SAVEDESTRUCTOR_X callback (at LEAVE) becomes a no-op. */
+    syck_free_emitter( emitter );
+    bonus->emitter = NULL;
     Safefree(bonus->tag);
+    bonus->tag = NULL;
 
     FREETMPS; LEAVE;
 
