@@ -37,6 +37,7 @@ t/bug/doesnt-stringify.t
 t/bug/rt-41141.t
 t/bug/rt-49404-double_free.t
 t/bug/rt-54167.t
+t/croak-leak.t
 t/gh-132-base60-safety.t
 t/gh-25-inline-array-no-space.t
 t/gh-26-implicit-type-roundtrip.t
@@ -56,7 +57,6 @@ t/json-null.t
 t/json-numbers.t
 t/json-refs.t
 t/json-singlequote.t
-t/croak-leak.t
 t/leak.t
 t/load-blessed.t
 t/str-type-regression.t
@@ -78,6 +78,7 @@ t/yaml-magic-vars.t
 t/yaml-merge-key.t
 t/yaml-multi-document.t
 t/yaml-nested-flow.t
+t/yaml-perl-scalar-leak.t
 t/yaml-roundtrip.t
 t/yaml-str-colon-first.t
 t/yaml-tie.t

@@ -379,7 +379,7 @@ yaml_syck_parser_handler
                     CHECK_UTF8;
                 }
 
-                sv = newRV_inc(sv);
+                sv = newRV_noinc(sv);
 
                 if ( load_blessed && (*(pkg - 1) != '\0') && (*pkg != '\0') ) {
                     sv_bless(sv, gv_stashpv(id + 12, TRUE));
