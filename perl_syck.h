@@ -816,11 +816,10 @@ void perl_json_postprocess(SV *sv) {
         *(s+len-2) = '\'';
     }
 
-    /* 2010-07-20 - TODDR: This for loop doesn't appear to do anything other than shorten
-     * the line if it sees [,:] when not in quotes. Even then it appears that the \0 isn't
-     * being placed right if that happens. TODO: need test case to prove this does not work
-     * as expected.
-    */
+    /* Strip spaces after ':' and ',' outside quoted strings to produce
+     * compact JSON.  The C-level emitter outputs "key": "value", ... with
+     * spaces; this in-place compaction removes them.  See t/json-postprocess.t.
+     */
     for (i = 0; i < len; i++) {
         ch = *(s+i);
         *pos++ = ch;
