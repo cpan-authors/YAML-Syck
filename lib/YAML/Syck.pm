@@ -137,7 +137,9 @@ sub LoadBytes {
     my ($str) = @_;
     utf8::downgrade($str);
     if (wantarray) {
+        return unless defined $str && length $str;
         my ($rv) = YAML::Syck::LoadYAML($str);
+        return unless defined $rv;
         return @{$rv};
     }
     return YAML::Syck::LoadYAML($str);
@@ -147,7 +149,9 @@ sub LoadUTF8 {
     my ($str) = @_;
     local $YAML::Syck::ImplicitUnicode = 1;
     if (wantarray) {
+        return unless defined $str && length $str;
         my ($rv) = YAML::Syck::LoadYAML($str);
+        return unless defined $rv;
         return @{$rv};
     }
     return YAML::Syck::LoadYAML($str);
