@@ -57,7 +57,9 @@ sub Dump {
 
 sub Load {
     if (wantarray) {
+        return unless defined $_[0] && length $_[0];
         my ($rv) = YAML::Syck::LoadYAML( $_[0] );
+        return unless defined $rv;
         @{$rv};
     }
     else {
