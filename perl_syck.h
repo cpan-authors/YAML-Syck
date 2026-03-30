@@ -1189,8 +1189,10 @@ yaml_syck_emitter_handler
         /* emit an undef (typically pointed from a blesed SvRV) */
         syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
-    else if (SvPOK(sv)) {
-        /* emit a string */
+    else if (SvPOK(sv) && ty != SVt_PVCV) {
+        /* emit a string (exclude CVs: prototyped subs have SvPOK set for the
+         * prototype string, but must go through the SVt_PVCV case below for
+         * proper B::Deparse handling) */
         STRLEN len = sv_len(sv);
 
 /* JSON should preserve quotes even on simple integers ("0" is true in javascript) */
@@ -1341,7 +1343,6 @@ yaml_syck_emitter_handler
                 }
                 else {
                     dSP;
-                    I32 len;
                     int count, reallen;
                     SV *text;
                     CV *cv = (CV*)sv;
@@ -1369,7 +1370,6 @@ yaml_syck_emitter_handler
                     }
 
                     text = POPs;
-                    len = SvLEN(text);
                     reallen = strlen(SvPV_nolen(text));
 
                     /*
@@ -1377,7 +1377,7 @@ yaml_syck_emitter_handler
                      * "(prototype) ;" or ";".
                      */
 
-                    if (len == 0 || *(SvPV_nolen(text)+reallen-1) == ';') {
+                    if (reallen == 0 || *(SvPV_nolen(text)+reallen-1) == ';') {
                         croak("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n");
                     }
 
