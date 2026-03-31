@@ -21,15 +21,15 @@ ppport.h
 ppport_math.h
 ppport_sort.h
 README.md
-syck_.c
 syck.h
+Syck.xs
+syck_.c
 syck_st.c
 syck_st.h
-Syck.xs
+t/1-basic.t
 t/11-loadfile.t
 t/12-dumpfile.t
 t/19-no-trailing-whitespace.t
-t/1-basic.t
 t/2-scalars.t
 t/3-objects.t
 t/4-perl_tag_scheme.t
@@ -62,9 +62,8 @@ t/json-refs.t
 t/json-singlequote.t
 t/leak.t
 t/load-blessed.t
-token.c
-t/strtok-null-type.t
 t/str-type-regression.t
+t/strtok-null-type.t
 t/tag-overflow.t
 t/TestYAML.pm
 t/yaml-alias.t
@@ -88,3 +87,4 @@ t/yaml-str-colon-first.t
 t/yaml-tie.t
 t/yaml-timestamps.t
 t/yaml-utf.t
+token.c
