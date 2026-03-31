@@ -35,7 +35,9 @@ prove -bv t/1-basic.t
 ## Key Files for Changes
 
 - `Changes` - changelog; update before each release
-- `MANIFEST` - list of files included in the CPAN tarball
+- `MANIFEST` - list of files included in the CPAN tarball. The ordering is controlled by
+  `make manifest` (after a clean `perl Makefile.PL`). When adding entries manually, preserve
+  the existing order and do not re-sort unless the file is regenerated via `make manifest`.
 - `MANIFEST.SKIP` - patterns for files excluded from the tarball.
 - `cpanfile` - dependency declarations for CI
 - `.github/workflows/testsuite.yml` - GitHub Actions CI
