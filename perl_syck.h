@@ -1430,7 +1430,7 @@ yaml_syck_emitter_handler
 #ifndef CLEANUP_EMITTER_BONUS_DEFINED
 #define CLEANUP_EMITTER_BONUS_DEFINED
 static void
-cleanup_emitter_bonus(void *p) {
+cleanup_emitter_bonus(pTHX_ void *p) {
     struct emitter_xtra *bonus = (struct emitter_xtra *)p;
     if (bonus->cur_ref != NULL) {
         Safefree(bonus->cur_ref);
