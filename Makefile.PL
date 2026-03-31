@@ -67,7 +67,7 @@ WriteMakefile(
         'META_MERGE' => {
             'meta-spec' => { version => 2 },
             resources => {
-                'license'    => ['https://opensource.org/licenses/MIT'],
+                'license'    => ['https://dev.perl.org/licenses/'],
                 'homepage'   => 'https://github.com/toddr/YAML-Syck',
                 'bugtracker' => {
                     'web' => 'https://github.com/toddr/YAML-Syck/issues',
