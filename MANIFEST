@@ -42,6 +42,7 @@ t/gh-132-base60-safety.t
 t/gh-25-inline-array-no-space.t
 t/gh-26-implicit-type-roundtrip.t
 t/gh-28-wide-char-dumpfile.t
+t/gh-dumpcode-prototype.t
 t/gh-load-list-context.t
 t/json-basic.t
 t/json-circular-ref.t
