@@ -1547,7 +1547,9 @@ DumpYAML
 (SV *sv) {
     SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
     struct emitter_xtra bonus;
-    SV *out = newSVpvn("", 0);
+    /* Mortalize so croak inside DumpImpl won't leak the SV.
+     * SvREFCNT_inc before return counteracts the XS wrapper's sv_2mortal. */
+    SV *out = sv_2mortal(newSVpvn("", 0));
     bonus.out.outsv = out;
 #ifdef YAML_IS_JSON
     DumpJSONImpl(sv, &bonus, perl_syck_output_handler_pv);
@@ -1562,6 +1564,7 @@ DumpYAML
         SvUTF8_on(out);
     }
 #endif
+    SvREFCNT_inc_simple_void(out);
     return out;
 }
 
@@ -1578,8 +1581,9 @@ DumpYAMLFile
 #ifdef YAML_IS_JSON
     {
         /* Buffer into an SV so we can apply perl_json_postprocess(),
-         * then write the postprocessed result to the file handle. */
-        SV *buf = newSVpvn("", 0);
+         * then write the postprocessed result to the file handle.
+         * Mortalize buf so croak inside DumpJSONImpl won't leak it. */
+        SV *buf = sv_2mortal(newSVpvn("", 0));
         STRLEN len;
         char *s;
         bonus.out.outsv = buf;
@@ -1593,7 +1597,6 @@ DumpYAMLFile
                 bonus.ioerror = errno;
             }
         }
-        SvREFCNT_dec(buf);
     }
 #else
     DumpYAMLImpl(sv, &bonus, perl_syck_output_handler_io);
