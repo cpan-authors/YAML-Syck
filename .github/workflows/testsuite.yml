@@ -22,10 +22,10 @@ jobs:
       - uses: actions/checkout@v6
       - name: perl -V
         run: perl -V
+      - name: Install cpm
+        run: sudo curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/main/cpm -o /usr/local/bin/cpm && sudo chmod 755 /usr/local/bin/cpm
       - name: Install Dependencies
-        uses: perl-actions/install-with-cpm@v1
-        with:
-          cpanfile: "cpanfile"
+        run: sudo perl /usr/local/bin/cpm install -g --show-build-log-on-failure --no-test --cpanfile cpanfile
       - name: Makefile.PL
         run: perl -I$(pwd) Makefile.PL
       - name: make test
@@ -44,10 +44,10 @@ jobs:
       - uses: actions/checkout@v6
       - name: perl -V
         run: perl -V
+      - name: Install cpm
+        run: sudo curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/main/cpm -o /usr/local/bin/cpm && sudo chmod 755 /usr/local/bin/cpm
       - name: Install Dependencies
-        uses: perl-actions/install-with-cpm@v1
-        with:
-          cpanfile: "cpanfile"
+        run: sudo perl /usr/local/bin/cpm install -g --show-build-log-on-failure --no-test --cpanfile cpanfile
       - name: Makefile.PL
         run: perl -I$(pwd) Makefile.PL
       - name: make disttest
@@ -89,11 +89,10 @@ jobs:
       - uses: actions/checkout@v6
       - name: perl -V
         run: perl -V
+      - name: Install cpm
+        run: curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/main/cpm -o /usr/local/bin/cpm && chmod 755 /usr/local/bin/cpm
       - name: Install Dependencies
-        uses: perl-actions/install-with-cpm@v1
-        with:
-          sudo: false
-          cpanfile: "cpanfile"
+        run: perl /usr/local/bin/cpm install -g --show-build-log-on-failure --no-test --cpanfile cpanfile
       - run: perl Makefile.PL
       - run: make
       - run: make test
@@ -114,11 +113,10 @@ jobs:
         run: brew install perl
       - name: perl -V
         run: perl -V
+      - name: Install cpm
+        run: sudo curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/main/cpm -o /usr/local/bin/cpm && sudo chmod 755 /usr/local/bin/cpm
       - name: Install Dependencies
-        uses: perl-actions/install-with-cpm@v1
-        with:
-          sudo: false
-          cpanfile: "cpanfile"
+        run: sudo perl /usr/local/bin/cpm install -g --show-build-log-on-failure --no-test --cpanfile cpanfile
       - run: perl Makefile.PL
       - run: make
       - run: make test
@@ -140,11 +138,11 @@ jobs:
             Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: perl -V
         run: perl -V
+      - name: Install cpm
+        run: curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/main/cpm -o C:\cpm
+        shell: bash
       - name: Install Dependencies
-        uses: perl-actions/install-with-cpm@v1
-        with:
-          sudo: false
-          cpanfile: "cpanfile"
+        run: perl C:\cpm install -g --show-build-log-on-failure --no-test --cpanfile cpanfile
       - name: perl Makefile.PL
         run: perl Makefile.PL
       - name: make
