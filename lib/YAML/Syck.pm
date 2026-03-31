@@ -59,7 +59,7 @@ sub Load {
     if (wantarray) {
         return unless defined $_[0] && length $_[0];
         my ($rv) = YAML::Syck::LoadYAML( $_[0] );
-        return unless defined $rv;
+        return unless defined $rv && ref $rv eq 'ARRAY';
         @{$rv};
     }
     else {
@@ -139,7 +139,7 @@ sub LoadBytes {
     if (wantarray) {
         return unless defined $str && length $str;
         my ($rv) = YAML::Syck::LoadYAML($str);
-        return unless defined $rv;
+        return unless defined $rv && ref $rv eq 'ARRAY';
         return @{$rv};
     }
     return YAML::Syck::LoadYAML($str);
@@ -151,7 +151,7 @@ sub LoadUTF8 {
     if (wantarray) {
         return unless defined $str && length $str;
         my ($rv) = YAML::Syck::LoadYAML($str);
-        return unless defined $rv;
+        return unless defined $rv && ref $rv eq 'ARRAY';
         return @{$rv};
     }
     return YAML::Syck::LoadYAML($str);
