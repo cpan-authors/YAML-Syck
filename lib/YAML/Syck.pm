@@ -4,7 +4,7 @@ package YAML::Syck;
 
 use strict;
 
-our ( $Headless, $SingleQuote, $ImplicitBinary, $ImplicitTyping, $ImplicitUnicode, $UseCode, $LoadCode, $DumpCode, $DeparseObject );
+our ( $Headless, $SingleQuote, $ImplicitBinary, $ImplicitTyping, $ImplicitUnicode, $UseCode, $LoadCode, $DumpCode, $DeparseObject, $MaxDepth );
 
 use 5.006;
 use Exporter;
@@ -224,6 +224,13 @@ Some calls are designed to die rather than returning YAML. You should wrap
 your calls in eval to assure you do not get unexpected results.
 
 =head1 FLAGS
+
+=head2 $YAML::Syck::MaxDepth
+
+Maximum nesting depth for C<Dump>.  Defaults to 512.  If a data structure
+is nested deeper than this limit, C<Dump> will C<croak> instead of
+overflowing the C stack.  Increase this if you legitimately need to
+serialize very deeply nested structures.
 
 =head2 $YAML::Syck::Headless
 
