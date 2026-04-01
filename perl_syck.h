@@ -265,7 +265,7 @@ yaml_syck_parser_handler
                 STRLEN len = n->data.str->len;
                 int is_neg = (*ptr == '-');
                 syck_str_blow_away_commas( n );
-                if (is_neg) { ptr++; len--; }
+                if (*ptr == '-' || *ptr == '+') { ptr++; len--; }
                 UV uv = grok_hex( ptr, &len, &flags, NULL);
                 if (is_neg)
                     sv = newSViv(-(IV)uv);
@@ -277,7 +277,7 @@ yaml_syck_parser_handler
                 STRLEN len = n->data.str->len;
                 int is_neg = (*ptr == '-');
                 syck_str_blow_away_commas( n );
-                if (is_neg) { ptr++; len--; }
+                if (*ptr == '-' || *ptr == '+') { ptr++; len--; }
                 UV uv = grok_oct( ptr, &len, &flags, NULL);
                 if (is_neg)
                     sv = newSViv(-(IV)uv);
