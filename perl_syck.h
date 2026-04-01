@@ -230,8 +230,11 @@ yaml_syck_parser_handler
                 char *ptr, *end;
                 UV sixty = 1;
                 UV total = 0;
+                int is_neg;
                 syck_str_blow_away_commas( n );
                 ptr = n->data.str->ptr;
+                is_neg = (*ptr == '-');
+                if (is_neg) ptr++;
                 end = n->data.str->ptr + n->data.str->len;
                 while ( end > ptr )
                 {
@@ -252,7 +255,10 @@ yaml_syck_parser_handler
                     total += bnum * sixty;
                     sixty *= 60;
                 }
-                sv = newSVuv(total);
+                if (is_neg)
+                    sv = newSViv(-(IV)total);
+                else
+                    sv = newSVuv(total);
             } else if (strEQ( id, "int#hex" )) {
                 I32 flags = 0;
                 STRLEN len = n->data.str->len;
