@@ -261,14 +261,28 @@ yaml_syck_parser_handler
                     sv = newSVuv(total);
             } else if (strEQ( id, "int#hex" )) {
                 I32 flags = 0;
+                char *ptr = n->data.str->ptr;
                 STRLEN len = n->data.str->len;
+                int is_neg = (*ptr == '-');
                 syck_str_blow_away_commas( n );
-                sv = newSVuv( grok_hex( n->data.str->ptr, &len, &flags, NULL) );
+                if (is_neg) { ptr++; len--; }
+                UV uv = grok_hex( ptr, &len, &flags, NULL);
+                if (is_neg)
+                    sv = newSViv(-(IV)uv);
+                else
+                    sv = newSVuv(uv);
             } else if (strEQ( id, "int#oct" )) {
                 I32 flags = 0;
+                char *ptr = n->data.str->ptr;
                 STRLEN len = n->data.str->len;
+                int is_neg = (*ptr == '-');
                 syck_str_blow_away_commas( n );
-                sv = newSVuv( grok_oct( n->data.str->ptr, &len, &flags, NULL) );
+                if (is_neg) { ptr++; len--; }
+                UV uv = grok_oct( ptr, &len, &flags, NULL);
+                if (is_neg)
+                    sv = newSViv(-(IV)uv);
+                else
+                    sv = newSVuv(uv);
             } else if (strEQ( id, "int" ) ) {
                 UV uv;
                 int flags;
