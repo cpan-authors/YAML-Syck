@@ -45,6 +45,7 @@ t/gh-28-wide-char-dumpfile.t
 t/gh-dumpcode-prototype.t
 t/gh-load-list-context.t
 t/gh-negative-hex-oct.t
+t/gh-negative-base60.t
 t/json-basic.t
 t/json-circular-ref.t
 t/json-crlf.t
