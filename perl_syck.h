@@ -308,6 +308,7 @@ yaml_syck_parser_handler
                 long len = 0;
                 char *blob = syck_base64dec(n->data.str->ptr, n->data.str->len, &len);
                 sv = newSVpv(blob, len);
+                free(blob);
 #ifndef YAML_IS_JSON
 #ifdef PERL_LOADMOD_NOIMPORT
             } else if (strEQ(id, "perl/code") || strnEQ(id, "perl/code:", 10)) {
@@ -1250,6 +1251,7 @@ yaml_syck_emitter_handler
                     /* Binary here */
                     char *base64 = syck_base64enc( str, bin_len );
                     syck_emit_scalar(e, "tag:yaml.org,2002:binary", SCALAR_STRING, 0, 0, 0, base64, strlen(base64));
+                    free(base64);
                     is_ascii = FALSE;
                     break;
                 }
