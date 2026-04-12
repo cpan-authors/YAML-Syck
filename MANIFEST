@@ -43,6 +43,7 @@ t/gh-25-inline-array-no-space.t
 t/gh-26-implicit-type-roundtrip.t
 t/gh-28-wide-char-dumpfile.t
 t/gh-dumpcode-prototype.t
+t/gh-loadfile-dumpfile-errors.t
 t/gh-load-list-context.t
 t/gh-negative-base60.t
 t/gh-negative-hex-oct.t
