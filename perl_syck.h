@@ -55,7 +55,7 @@ static enum scalar_style yaml_quote_style = scalar_none;
 #  define SEQ_NONE      seq_none
 #  define MAP_NONE      map_none
 #ifdef SvUTF8
-#  define IS_UTF8(x)    (SvUTF8(sv))
+#  define IS_UTF8(x)    (SvUTF8(x))
 #else
 #  define IS_UTF8(x)    (FALSE)
 #endif
@@ -869,6 +869,22 @@ void perl_json_postprocess(SV *sv) {
 }
 #endif
 
+/* Destructor for SAVEDESTRUCTOR_X: frees parser on croak.
+ * Registered after syck_new_parser() so Perl's scope unwinding handles
+ * cleanup even when croak() longjmps past the normal return path.
+ * Guarded because perl_syck.h is included twice (YAML and JSON modes). */
+#ifndef CLEANUP_PARSER_DEFINED
+#define CLEANUP_PARSER_DEFINED
+static void
+cleanup_parser(pTHX_ void *p) {
+    SyckParser **pp = (SyckParser **)p;
+    if (*pp != NULL) {
+        syck_free_parser(*pp);
+        *pp = NULL;
+    }
+}
+#endif
+
 #ifdef YAML_IS_JSON
 static SV * LoadJSON (char *s) {
 #else
@@ -894,6 +910,7 @@ static SV * LoadYAML (char *s) {
 
 #ifdef YAML_IS_JSON
     s = perl_json_preprocess(s);
+    SAVEFREEPV(s);  /* freed at LEAVE — also on croak */
 #else
     /* Special preprocessing to maintain compat with YAML.pm <= 0.35 */
     if (strnEQ( s, "--- #YAML:1.0", 13)) {
@@ -902,6 +919,11 @@ static SV * LoadYAML (char *s) {
 #endif
 
     parser = syck_new_parser();
+
+    /* Register destructor so croak() in parser callbacks (error_handler,
+     * parser_handler code-loading) won't leak the SyckParser. */
+    SAVEDESTRUCTOR_X(cleanup_parser, &parser);
+
     syck_parser_str_auto(parser, s, NULL);
     syck_parser_handler(parser, PERL_SYCK_PARSER_HANDLER);
     syck_parser_error_handler(parser, perl_syck_error_handler);
@@ -921,7 +943,9 @@ static SV * LoadYAML (char *s) {
     if (GIMME_V == G_ARRAY) {
         SYMID prev_v = 0;
 
-        obj = (SV*)newAV();
+        /* Mortalize the AV so croak() during syck_parse() won't leak it.
+         * Use newRV_inc to compensate — the mortal entry decrements at LEAVE. */
+        obj = (SV*)sv_2mortal((SV*)newAV());
         while ((v = syck_parse(parser)) && (v != prev_v)) {
             SV *cur = &PL_sv_undef;
             if (!syck_lookup_sym(parser, v, (char **)&cur)) {
@@ -933,7 +957,7 @@ static SV * LoadYAML (char *s) {
 
             prev_v = v;
         }
-        obj = newRV_noinc(obj);
+        obj = newRV_inc(obj);
     }
     else
 #endif
@@ -944,11 +968,12 @@ static SV * LoadYAML (char *s) {
         }
     }
 
+    /* Normal path: free parser now and NULL the pointer so the
+     * SAVEDESTRUCTOR_X callback (at LEAVE) becomes a no-op. */
     syck_free_parser(parser);
+    parser = NULL;
 
-#ifdef YAML_IS_JSON
-    Safefree(s);
-#endif
+    /* In JSON mode, SAVEFREEPV(s) frees the preprocessed string at LEAVE. */
 
     FREETMPS; LEAVE;
 
