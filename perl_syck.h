@@ -1156,6 +1156,7 @@ yaml_syck_emitter_handler
                 sprintf(an, "*%s", anchor_name);
                 syck_emitter_write(e, an, strlen(anchor_name) + 1);
                 S_FREE(an);
+                *tag = '\0';
                 Safefree(ref_orig);
                 bonus->cur_ref = NULL;
                 return;
