@@ -214,7 +214,7 @@ yaml_syck_parser_handler
                     total += bnum * sixty;
                     sixty *= 60;
                 }
-                sv = newSVnv(is_neg ? -total : total);
+                sv = newSVnv((is_neg && total != 0.0) ? -total : total);
 #ifdef NV_NAN
             } else if (strEQ( id, "float#nan" )) {
                 sv = newSVnv(NV_NAN);
