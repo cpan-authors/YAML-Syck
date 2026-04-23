@@ -189,8 +189,11 @@ yaml_syck_parser_handler
                 char *ptr, *end;
                 UV sixty = 1;
                 NV total = 0.0;
+                int is_neg;
                 syck_str_blow_away_commas( n );
                 ptr = n->data.str->ptr;
+                is_neg = (*ptr == '-');
+                if (*ptr == '-' || *ptr == '+') ptr++;
                 end = n->data.str->ptr + n->data.str->len;
                 while ( end > ptr )
                 {
@@ -211,7 +214,7 @@ yaml_syck_parser_handler
                     total += bnum * sixty;
                     sixty *= 60;
                 }
-                sv = newSVnv(total);
+                sv = newSVnv((is_neg && total != 0.0) ? -total : total);
 #ifdef NV_NAN
             } else if (strEQ( id, "float#nan" )) {
                 sv = newSVnv(NV_NAN);
