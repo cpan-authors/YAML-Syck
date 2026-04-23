@@ -62,6 +62,7 @@ t/json-null.t
 t/json-numbers.t
 t/json-postprocess.t
 t/json-refs.t
+t/json-max-depth.t
 t/json-singlequote.t
 t/leak.t
 t/load-blessed.t
@@ -87,6 +88,7 @@ t/yaml-multi-document.t
 t/yaml-nested-flow.t
 t/yaml-perl-scalar-leak.t
 t/yaml-roundtrip.t
+t/yaml-sortkeys.t
 t/yaml-str-colon-first.t
 t/yaml-tie.t
 t/yaml-timestamps.t
