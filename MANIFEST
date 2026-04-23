@@ -44,8 +44,8 @@ t/gh-25-inline-array-no-space.t
 t/gh-26-implicit-type-roundtrip.t
 t/gh-28-wide-char-dumpfile.t
 t/gh-dumpcode-prototype.t
-t/gh-loadfile-dumpfile-errors.t
 t/gh-load-list-context.t
+t/gh-loadfile-dumpfile-errors.t
 t/gh-negative-base60.t
 t/gh-negative-float-base60.t
 t/gh-negative-hex-oct.t
@@ -59,13 +59,13 @@ t/json-empty.t
 t/json-escape-sequences.t
 t/json-indent.t
 t/json-loadfile.t
+t/json-max-depth.t
 t/json-minus.t
 t/json-newline.t
 t/json-null.t
 t/json-numbers.t
 t/json-postprocess.t
 t/json-refs.t
-t/json-max-depth.t
 t/json-singlequote.t
 t/leak.t
 t/load-blessed.t
