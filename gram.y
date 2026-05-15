@@ -317,6 +317,10 @@ in_inline_seq
                     syck_seq_add( $1, syck_hdlr_add_node( (SyckParser *)parser, $3 ) );
                     $$ = $1;
                                 }
+        | in_inline_seq ','
+        {
+                    $$ = $1;
+                }
         ;
 
 inline_seq_atom
@@ -446,6 +450,10 @@ in_inline_map
                     $3 = NULL;
                     $$ = $1;
                                 }
+        | in_inline_map ','
+        {
+                    $$ = $1;
+                }
         ;
 
 inline_map_atom
