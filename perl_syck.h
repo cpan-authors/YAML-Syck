@@ -904,6 +904,7 @@ static SV * LoadYAML (char *s) {
     SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *singlequote      = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
     SV *load_blessed     = GvSV(gv_fetchpv(form("%s::LoadBlessed", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *max_depth        = GvSV(gv_fetchpv(form("%s::MaxDepth", PACKAGE_NAME), TRUE, SVt_PV));
     json_quote_char      = (SvTRUE(singlequote) ? '\'' : '"' );
 
     ENTER; SAVETMPS;
@@ -933,6 +934,10 @@ static SV * LoadYAML (char *s) {
     syck_parser_bad_anchor_handler( parser, perl_syck_bad_anchor_handler );
     syck_parser_implicit_typing(parser, SvTRUE(implicit_typing));
     syck_parser_taguri_expansion(parser, 0);
+    if (SvIOK(max_depth))
+        parser->max_depth = SvIV(max_depth);
+    else
+        parser->max_depth = 512;
 
     bonus.objects          = (AV*)sv_2mortal((SV*)newAV());
     bonus.implicit_unicode = SvTRUE(implicit_unicode);

@@ -171,6 +171,7 @@ syck_new_parser(void)
     p->bufsize = SYCK_BUFFERSIZE;
     p->buffer = NULL;
     p->lvl_idx = 0;
+    p->max_depth = 0;
     syck_parser_reset_levels( p );
     return p;
 }
@@ -356,10 +357,15 @@ syck_parser_pop_level( SyckParser *p )
     free( p->levels[p->lvl_idx].domain );
 }
 
-void 
+void
 syck_parser_add_level( SyckParser *p, int len, enum syck_level_status status )
 {
     ASSERT( p != NULL );
+    if ( p->max_depth > 0 && p->lvl_idx >= p->max_depth )
+    {
+        (p->error_handler)(p, "document is nested too deeply");
+        return;
+    }
     if ( p->lvl_idx + 1 > p->lvl_capa )
     {
         p->lvl_capa += ALLOC_CT;
