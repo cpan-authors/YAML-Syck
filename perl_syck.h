@@ -1337,6 +1337,8 @@ yaml_syck_emitter_handler
                 && syck_str_is_unquotable_integer(str, len)) /* small enough to safely round-trip */
             {
                 syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, str, len);
+            } else if (SvNOK(sv) && !SvIOK(sv)) {
+                syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, str, len);
             } else {
                 syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, str, len);
             }
