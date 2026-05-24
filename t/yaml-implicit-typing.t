@@ -67,11 +67,25 @@ subtest 'hexadecimal integers' => sub {
     is( load_val('0xDEAD'), 0xDEAD, '0xDEAD' );
 };
 
+subtest 'hexadecimal integers with commas' => sub {
+    is( load_val('0xff,ff'),       0xffff,   '0xff,ff' );
+    is( load_val('0xDE,AD'),       0xDEAD,   '0xDE,AD' );
+    is( load_val('-0xff,ff'),      -0xffff,  '-0xff,ff' );
+    is( load_val('+0xff,ff'),      0xffff,   '+0xff,ff' );
+    is( load_val('0xAA,BB,CC,DD'), 0xAABBCCDD, '0xAA,BB,CC,DD' );
+};
+
 subtest 'octal integers' => sub {
     is( load_val('00'),   0,   '00 (octal)' );
     is( load_val('01'),   1,   '01 (octal)' );
     is( load_val('010'),  8,   '010 (octal)' );
     is( load_val('0777'), 511, '0777 (octal)' );
+};
+
+subtest 'octal integers with commas' => sub {
+    is( load_val('012,34'),   0001234,  '012,34' );
+    is( load_val('-012,34'),  -0001234, '-012,34' );
+    is( load_val('+012,34'),  0001234,  '+012,34' );
 };
 
 subtest 'base60 (sexagesimal) integers' => sub {
