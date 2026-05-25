@@ -1,3 +1,8 @@
+#!include_default
+
+# AI agent instructions - not for distribution
+^\.claude/
+
 \.DS_Store
 \bdiffs?\b
 ^MANIFEST\.
@@ -5,9 +10,6 @@
 ^MYMETA
 ^Makefile$
 ^cpanfile$
-~$
-\.old$
-\.bak$
 \.o$
 \.so$
 \.orig$

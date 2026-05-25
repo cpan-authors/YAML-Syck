@@ -1249,7 +1249,11 @@ yaml_syck_emitter_handler
 /* JSON should preserve quotes even on simple integers ("0" is true in javascript) */
 #ifndef YAML_IS_JSON
         if (looks_like_number(sv)) {
-        	if(syck_str_is_unquotable_integer(SvPV_nolen(sv), sv_len(sv))) {
+        	if(!(SvIOK(sv) || SvNOK(sv))) {
+        		/* POK-only: string that looks numeric — quote to preserve type */
+        		syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, SvPV_nolen(sv), len);
+        	}
+        	else if(syck_str_is_unquotable_integer(SvPV_nolen(sv), sv_len(sv))) {
         		/* emit an unquoted number only if it's a very basic integer. /^-?[1-9][0-9]*$/ */
         		syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), len);
         	}
@@ -1299,19 +1303,42 @@ yaml_syck_emitter_handler
         }
     }
     else if (SvNIOK(sv)) {
-    	/* Stringify the sv, being careful not to overwrite its PV part */
-    	SV *sv2 = newSVsv(sv);
-    	STRLEN len;
-    	char *str = SvPV(sv2, len);
-    	if (SvIOK(sv) /* original SV was an int */
-    	    && syck_str_is_unquotable_integer(str, len)) /* small enough to safely round-trip */
-    	{
-    		syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, str, len);
-        } else {
-    		/* We need to quote it */
-    		syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, str, len);
+#ifndef YAML_IS_JSON
+        int special_nv = 0;
+        {
+            NV nv = SvNV(sv);
+#ifdef NV_NAN
+            if (nv != nv) {
+                syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, ".nan", 4);
+                special_nv = 1;
+            }
+#endif
+#ifdef NV_INF
+            if (!special_nv && nv == NV_INF) {
+                syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, ".inf", 4);
+                special_nv = 1;
+            }
+            if (!special_nv && nv == -NV_INF) {
+                syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, "-.inf", 5);
+                special_nv = 1;
+            }
+#endif
         }
-        SvREFCNT_dec(sv2);
+        if (!special_nv)
+#endif
+        {
+            SV *sv2 = newSVsv(sv);
+            STRLEN len;
+            char *str = SvPV(sv2, len);
+            if (SvIOK(sv) /* original SV was an int */
+                && syck_str_is_unquotable_integer(str, len)) /* small enough to safely round-trip */
+            {
+                syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, str, len);
+            } else {
+                syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, str, len);
+            }
+            SvREFCNT_dec(sv2);
+        }
     }
     else {
         switch (ty) {
