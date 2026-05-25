@@ -452,6 +452,12 @@ yaml_syck_parser_handler
                 Safefree(id_copy);
 #endif /* PERL_LOADMOD_NOIMPORT */
 #endif /* !YAML_IS_JSON */
+#ifndef YAML_IS_JSON
+            } else if (strEQ( id, "merge" )) {
+                sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+                CHECK_UTF8;
+                sv_magicext(sv, NULL, PERL_MAGIC_ext, NULL, "merge", 5);
+#endif
             } else {
                 /* croak("unknown node type: %s", id); */
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
@@ -638,13 +644,13 @@ yaml_syck_parser_handler
                     if (forward_anchor)
                         register_bad_alias(p, forward_anchor, val);
 
-                    /* YAML merge key (<<): defer merge processing until
-                     * all explicit keys are stored, so explicit keys
-                     * always take precedence over merged keys. */
-                    if (p->implicit_typing) {
-                        STRLEN klen;
-                        const char *kpv = SvPV(key, klen);
-                        if (klen == 2 && kpv[0] == '<' && kpv[1] == '<') {
+                    /* YAML merge key (<<): only trigger for unquoted <<
+                     * which gets type_id "merge" and is tagged with
+                     * PERL_MAGIC_ext in the node handler.  Quoted "<<"
+                     * has no magic and is treated as a regular key. */
+                    if (p->implicit_typing && SvMAGICAL(key)) {
+                        MAGIC *mg = mg_find(key, PERL_MAGIC_ext);
+                        if (mg && mg->mg_len == 5 && memEQ(mg->mg_ptr, "merge", 5)) {
                             if (!merge_values)
                                 merge_values = newAV();
                             SvREFCNT_inc(val);

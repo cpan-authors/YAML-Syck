@@ -52,6 +52,7 @@ t/gh-negative-base60.t
 t/gh-negative-float-base60.t
 t/gh-negative-hex-oct.t
 t/gh-positive-hex-oct.t
+t/gh-merge-key-roundtrip.t
 t/gh-trailing-comma.t
 t/json-basic.t
 t/json-circular-ref.t
