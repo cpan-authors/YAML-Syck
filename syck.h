@@ -290,6 +290,8 @@ struct _syck_parser {
     SyckLevel *levels;
     int lvl_idx;
     int lvl_capa;
+    /* Maximum nesting depth (0 = no limit) */
+    int max_depth;
     /* Pointer for extension's use */
     void *bonus;
 };
