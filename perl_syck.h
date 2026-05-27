@@ -1243,6 +1243,15 @@ yaml_syck_emitter_handler
         /* emit an undef (typically pointed from a blesed SvRV) */
         syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
+#ifdef SvIsBOOL
+    else if (SvIsBOOL(sv)) {
+        if (SvTRUE(sv)) {
+            syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, "true", 4);
+        } else {
+            syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, "false", 5);
+        }
+    }
+#endif
     else if (SvPOK(sv) && ty != SVt_PVCV) {
         /* emit a string (exclude CVs: prototyped subs have SvPOK set for the
          * prototype string, but must go through the SVt_PVCV case below for
