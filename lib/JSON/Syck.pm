@@ -15,6 +15,7 @@ sub DumpFile {
     my $file = shift;
     if ( YAML::Syck::_is_glob($file) ) {
         if ( tied(*$file) ) {
+
             # Tied filehandles (IO::String, IO::Scalar, etc.) don't support
             # C-level PerlIO_write. Fall back to Perl-level print.
             print $file YAML::Syck::DumpJSON( $_[0] )
@@ -36,7 +37,7 @@ sub DumpFile {
             die "Error writing to file $file: $!\n";
         }
         close $fh
-          or die "Error writing to file $file: $!\n";
+            or die "Error writing to file $file: $!\n";
     }
     return 1;
 }

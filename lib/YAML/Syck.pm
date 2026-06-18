@@ -4,7 +4,10 @@ package YAML::Syck;
 
 use strict;
 
-our ( $Headless, $SingleQuote, $ImplicitBinary, $ImplicitTyping, $ImplicitUnicode, $UseCode, $LoadCode, $DumpCode, $DeparseObject, $MaxDepth );
+our (
+    $Headless, $SingleQuote, $ImplicitBinary, $ImplicitTyping, $ImplicitUnicode,
+    $UseCode,  $LoadCode,    $DumpCode,       $DeparseObject,  $MaxDepth
+);
 
 use 5.006;
 use Exporter;
@@ -51,8 +54,8 @@ sub __qr_helper {
 
 sub Dump {
     $#_
-      ? join( '', map { YAML::Syck::DumpYAML($_) } @_ )
-      : YAML::Syck::DumpYAML( $_[0] );
+        ? join( '', map { YAML::Syck::DumpYAML($_) } @_ )
+        : YAML::Syck::DumpYAML( $_[0] );
 }
 
 sub Load {
@@ -74,7 +77,7 @@ sub _is_glob {
     return 1 if ( ref($h) eq 'GLOB' );
     return 1 if ( ref( \$h ) eq 'GLOB' );
     return 1 if ( index( ref($h), 'IO::' ) == 0 );
-    return 1 if ( ref($h) && UNIVERSAL::isa($h, 'IO::Handle') );
+    return 1 if ( ref($h) && UNIVERSAL::isa( $h, 'IO::Handle' ) );
 
     return;
 }
@@ -83,6 +86,7 @@ sub DumpFile {
     my $file = shift;
     if ( _is_glob($file) ) {
         if ( tied(*$file) ) {
+
             # Tied filehandles (IO::String, IO::Scalar, etc.) don't support
             # C-level PerlIO_write. Fall back to Perl-level print.
             for (@_) {
@@ -110,7 +114,7 @@ sub DumpFile {
             }
         }
         close $fh
-          or die "Error writing to file $file: $!\n";
+            or die "Error writing to file $file: $!\n";
     }
     return 1;
 }
@@ -158,9 +162,10 @@ sub LoadUTF8 {
 }
 
 sub DumpBytes {
-    my $result = $#_
-      ? join( '', map { YAML::Syck::DumpYAML($_) } @_ )
-      : YAML::Syck::DumpYAML( $_[0] );
+    my $result =
+        $#_
+        ? join( '', map { YAML::Syck::DumpYAML($_) } @_ )
+        : YAML::Syck::DumpYAML( $_[0] );
     utf8::encode($result) if utf8::is_utf8($result);
     return $result;
 }
@@ -168,8 +173,8 @@ sub DumpBytes {
 sub DumpUTF8 {
     local $YAML::Syck::ImplicitUnicode = 1;
     $#_
-      ? join( '', map { YAML::Syck::DumpYAML($_) } @_ )
-      : YAML::Syck::DumpYAML( $_[0] );
+        ? join( '', map { YAML::Syck::DumpYAML($_) } @_ )
+        : YAML::Syck::DumpYAML( $_[0] );
 }
 
 sub DumpInto {
