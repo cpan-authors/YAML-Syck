@@ -823,14 +823,14 @@ static char* perl_json_preprocess(char *s) {
     return out;
 }
 
-void perl_json_postprocess(SV *sv) {
+void perl_json_postprocess(SV *sv, STRLEN start) {
     STRLEN i;
     char ch;
     bool in_string = 0;
     bool in_quote  = 0;
     char *pos;
-    char *s = SvPVX(sv);
-    STRLEN len = sv_len(sv);
+    char *s = SvPVX(sv) + start;
+    STRLEN len = SvCUR(sv) - start;
     STRLEN final_len = len;
 
     pos = s;
@@ -868,7 +868,7 @@ void perl_json_postprocess(SV *sv) {
         final_len--; pos--;
     }
     *pos = '\0';
-    SvCUR_set(sv, final_len);
+    SvCUR_set(sv, start + final_len);
 }
 #endif
 
@@ -1638,7 +1638,7 @@ DumpYAML
 #ifdef YAML_IS_JSON
     DumpJSONImpl(sv, &bonus, perl_syck_output_handler_pv);
     if (SvCUR(out) > 0) {
-        perl_json_postprocess(out);
+        perl_json_postprocess(out, 0);
     }
 #else
     DumpYAMLImpl(sv, &bonus, perl_syck_output_handler_pv);
@@ -1673,7 +1673,7 @@ DumpYAMLFile
         bonus.out.outsv = buf;
         DumpJSONImpl(sv, &bonus, perl_syck_output_handler_pv);
         if (SvCUR(buf) > 0) {
-            perl_json_postprocess(buf);
+            perl_json_postprocess(buf, 0);
         }
         s = SvPV(buf, len);
         if (len > 0) {
@@ -1707,9 +1707,12 @@ DumpYAMLInto
     }
     bonus.out.outsv = out;
 #ifdef YAML_IS_JSON
-    DumpJSONImpl(sv, &bonus, perl_syck_output_handler_mg);
-    if (SvCUR(out) > 0) { /* XXX: needs to handle magic? */
-        perl_json_postprocess(out);
+    {
+        STRLEN prev_len = SvCUR(out);
+        DumpJSONImpl(sv, &bonus, perl_syck_output_handler_mg);
+        if (SvCUR(out) > prev_len) {
+            perl_json_postprocess(out, prev_len);
+        }
     }
 #else
     DumpYAMLImpl(sv, &bonus, perl_syck_output_handler_mg);
