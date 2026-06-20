@@ -1337,9 +1337,29 @@ yaml_syck_emitter_handler
                 && syck_str_is_unquotable_integer(str, len)) /* small enough to safely round-trip */
             {
                 syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, str, len);
-            } else {
+            }
+#ifdef YAML_IS_JSON
+            else {
+                /* JSON: all finite numbers emitted unquoted; NaN/Inf become null */
+                int is_nan_inf = 0;
+                NV nv = SvNV(sv);
+#ifdef NV_NAN
+                if (nv != nv) is_nan_inf = 1;
+#endif
+#ifdef NV_INF
+                if (!is_nan_inf && (nv == NV_INF || nv == -NV_INF)) is_nan_inf = 1;
+#endif
+                if (is_nan_inf) {
+                    syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+                } else {
+                    syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, str, len);
+                }
+            }
+#else
+            else {
                 syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, str, len);
             }
+#endif
             SvREFCNT_dec(sv2);
         }
     }

@@ -48,6 +48,7 @@ t/gh-load-list-context.t
 t/gh-loadfile-dumpfile-errors.t
 t/gh-nan-inf-dump.t
 t/gh-199-preserve-string-type.t
+t/gh-json-number-dump.t
 t/gh-negative-base60.t
 t/gh-negative-float-base60.t
 t/gh-negative-hex-oct.t
