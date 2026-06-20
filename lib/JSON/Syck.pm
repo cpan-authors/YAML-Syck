@@ -188,10 +188,6 @@ single-quoted string literals.
 Dumping into tied (or other magic variables) with C<DumpInto> might not work
 properly in all cases.
 
-When dumping with C<DumpFile>, spacing differs from C<Dump> (extra spaces
-after colons and a trailing newline) because C<DumpFile> uses the C-level
-serializer directly.
-
 =head1 SEE ALSO
 
 L<JSON::XS>, L<YAML::Syck>

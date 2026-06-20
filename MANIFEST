@@ -58,6 +58,7 @@ t/json-circular-ref.t
 t/json-crlf.t
 t/json-dumpfile.t
 t/json-dumpinto.t
+t/json-dumpinto-append.t
 t/json-empty.t
 t/json-escape-sequences.t
 t/json-indent.t
