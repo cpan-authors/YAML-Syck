@@ -266,9 +266,10 @@ yaml_syck_parser_handler
             } else if (strEQ( id, "int#hex" )) {
                 I32 flags = 0;
                 char *ptr = n->data.str->ptr;
-                STRLEN len = n->data.str->len;
                 int is_neg = (*ptr == '-');
+                STRLEN len;
                 syck_str_blow_away_commas( n );
+                len = n->data.str->len;
                 if (IS_SIGN(*ptr)) { ptr++; len--; }
                 UV uv = grok_hex( ptr, &len, &flags, NULL);
                 if (is_neg)
@@ -278,9 +279,10 @@ yaml_syck_parser_handler
             } else if (strEQ( id, "int#oct" )) {
                 I32 flags = 0;
                 char *ptr = n->data.str->ptr;
-                STRLEN len = n->data.str->len;
                 int is_neg = (*ptr == '-');
+                STRLEN len;
                 syck_str_blow_away_commas( n );
+                len = n->data.str->len;
                 if (IS_SIGN(*ptr)) { ptr++; len--; }
                 UV uv = grok_oct( ptr, &len, &flags, NULL);
                 if (is_neg)
