@@ -182,6 +182,16 @@ yaml_syck_parser_handler
                 sv = newSVsv(&PL_sv_yes);
             } else if (strEQ( id, "bool#no" )) {
                 sv = newSVsv(&PL_sv_no);
+            } else if (strEQ( id, "bool" )) {
+                char *implicit = syck_match_implicit( n->data.str->ptr, n->data.str->len );
+                if (strEQ( implicit, "bool#yes" )) {
+                    sv = newSVsv(&PL_sv_yes);
+                } else if (strEQ( implicit, "bool#no" )) {
+                    sv = newSVsv(&PL_sv_no);
+                } else {
+                    sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+                    CHECK_UTF8;
+                }
             } else if (strEQ( id, "default" )) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                 CHECK_UTF8;
