@@ -53,6 +53,7 @@ t/gh-negative-float-base60.t
 t/gh-negative-hex-oct.t
 t/gh-positive-hex-oct.t
 t/gh-trailing-comma.t
+t/gh-utf8-bom.t
 t/json-basic.t
 t/json-circular-ref.t
 t/json-crlf.t
