@@ -284,6 +284,8 @@ struct _syck_parser {
     } io;
     /* Symbol table for anchors */
     st_table *anchors, *bad_anchors;
+    /* Nodes evicted from anchors by redefinition, freed at teardown */
+    st_table *retired;
     /* Optional symbol table for SYMIDs */
     st_table *syms;
     /* Levels of indentation */

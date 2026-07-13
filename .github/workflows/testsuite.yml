@@ -31,6 +31,46 @@ jobs:
       - name: make test
         run: make test
 
+  asan:
+    needs: [ubuntu]
+    runs-on: ubuntu-latest
+
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTOMATED_TESTING: 1
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: perl -V
+        run: perl -V
+      - name: Install Dependencies
+        uses: perl-actions/install-with-cpm@v2
+        with:
+          cpanfile: "cpanfile"
+      - name: Install libasan
+        run: |
+          sudo apt-get update
+          # Install the newest libasanN in the archive rather than pinning a
+          # version (libasan8 is GCC 14 on Ubuntu 24.04); the soname changes as
+          # the runner's GCC moves. The LD_PRELOAD step resolves the path via gcc.
+          pkg=$(apt-cache search --names-only '^libasan[0-9]+$' | sort -V | tail -n1 | awk '{print $1}')
+          sudo apt-get install -y "${pkg:-libasan8}"
+      - name: Build XS with AddressSanitizer
+        run: |
+          CF="$(perl -MConfig -e 'print $Config{ccflags}') -fsanitize=address -fno-omit-frame-pointer -g -O0"
+          LF="$(perl -MConfig -e 'print $Config{lddlflags}') -fsanitize=address"
+          perl -I$(pwd) Makefile.PL CCFLAGS="$CF" LDDLFLAGS="$LF"
+          make
+      # The t/cve-*.t tests Load() the CPANSec trigger inputs in-process, so a
+      # plain `make test` under ASan aborts (halt_on_error) on any unpatched
+      # memory-safety defect and fails the job. No trigger logic lives here.
+      - name: Run test suite under AddressSanitizer
+        run: |
+          ASAN_LIB=$(gcc -print-file-name=libasan.so)
+          ASAN_OPTIONS="detect_leaks=0:verify_asan_link_order=0:halt_on_error=1" \
+            LD_PRELOAD="$ASAN_LIB" \
+            make test
+
   disttest:
     env:
       PERL_USE_UNSAFE_INC: 0

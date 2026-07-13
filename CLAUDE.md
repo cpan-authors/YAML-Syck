@@ -60,11 +60,45 @@ CI sets `AUTOMATED_TESTING=1` which enables memory leak tests (`t/leak.t` requir
 9. `make dist` to create the tarball
 10. It will be manually uploaded to CPAN.
 
+## Security & CVE Work
+
+When fixing a CVE (or any reported memory-safety defect) in the bundled libsyck
+C code:
+
+- **Write one unit test per CVE.** Name it `t/cve-<id>-<slug>.t` (e.g.
+  `t/cve-2026-13713-anchor-node-uaf.t`). Each test documents the CWE, the exact
+  trigger input, and what the unpatched behavior looks like, so a researcher can
+  read a single file and understand the risk.
+- **Make the test fail provably without the fix, if at all possible.** Call
+  `Load()` on the trigger directly in the test body (one CVE per file, so a
+  crash only takes down that file, which the harness reports as failed). Wrap it
+  in `eval {}` so the *patched* behaviour — an ordinary parse-error croak — is a
+  pass; a C-level `abort()`/signal is not catchable and fails the file. Do not
+  fork a child `perl` to reproduce; keep it in-process. (`fork()` without exec
+  would give tidier TAP but is unsafe on Windows, where pseudo-fork shares the
+  process and a crash kills the parent.) Depending on the defect:
+  - Crashes on a normal build (double-free, wild write): the unpatched file
+    aborts (`wstat` shows the signal) and passes once patched. Provable anywhere.
+  - Observably wrong output (e.g. an OOB read that leaks bytes into a decoded
+    result): assert the corrected, deterministic output — fails unpatched on a
+    normal build.
+  - Silent (non-crashing UAF / one-byte over-read): cannot fail a normal build;
+    the direct `Load()` just returns. It is proven by the **ASan CI job**
+    (`asan` in `.github/workflows/testsuite.yml`), where the same in-process
+    `Load()` aborts under AddressSanitizer. Say so in the test's comments.
+- The `asan` CI job builds the XS with `-fsanitize=address` and runs both the
+  suite and the documented CVE trigger inputs; it is the authoritative check for
+  the silent defects. macOS cannot run it (stock perl can't instrument a
+  `dlopen`'d XS module) — it is Linux-only.
+- Add every new `t/cve-*.t` to `MANIFEST` (see the MANIFEST notes above).
+
 ## Coding Conventions
 
 - Perl minimum version: 5.8
 - Tests use `Test::More`
 - Bug regression tests go in `t/` and are named after the GitHub issue (`t/gh-*.t`)
+- CVE regression tests go in `t/` and are named `t/cve-<id>-<slug>.t` (see
+  Security & CVE Work above)
 - C code follows libsyck style; Perl-side logic is in `perl_syck.h`
 - `$YAML::Syck::*` global variables control serialization behavior (see POD in `lib/YAML/Syck.pm`)
 - a .perltidyrc file exists in the base of the repo and we enforce tidiness in any .pm file.
