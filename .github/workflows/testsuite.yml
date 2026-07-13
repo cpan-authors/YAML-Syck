@@ -48,7 +48,13 @@ jobs:
         with:
           cpanfile: "cpanfile"
       - name: Install libasan
-        run: sudo apt-get update && sudo apt-get install -y libasan8
+        run: |
+          sudo apt-get update
+          # Install the newest libasanN in the archive rather than pinning a
+          # version (libasan8 is GCC 14 on Ubuntu 24.04); the soname changes as
+          # the runner's GCC moves. The LD_PRELOAD step resolves the path via gcc.
+          pkg=$(apt-cache search --names-only '^libasan[0-9]+$' | sort -V | tail -n1 | awk '{print $1}')
+          sudo apt-get install -y "${pkg:-libasan8}"
       - name: Build XS with AddressSanitizer
         run: |
           CF="$(perl -MConfig -e 'print $Config{ccflags}') -fsanitize=address -fno-omit-frame-pointer -g -O0"
