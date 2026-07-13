@@ -168,7 +168,8 @@ yaml_syck_parser_handler
     switch (n->kind) {
         case syck_str_kind:
             if (TYPE_IS_NULL(id)) {
-                if (strnEQ( n->data.str->ptr, NULL_LITERAL, 1+NULL_LITERAL_LENGTH)
+                if (id == NULL
+                    && strnEQ( n->data.str->ptr, NULL_LITERAL, 1+NULL_LITERAL_LENGTH)
                     && (n->data.str->style == scalar_plain)) {
                     sv = newSV(0);
                 }
