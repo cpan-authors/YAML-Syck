@@ -175,6 +175,11 @@ yaml_syck_parser_handler
                 else {
                     sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                     CHECK_UTF8;
+#ifndef YAML_IS_JSON
+                    if (n->data.str->style == scalar_plain
+                        && looks_like_number(sv))
+                        (void)SvNV(sv);
+#endif
                 }
             } else if (strEQ( id, "null" )) {
                 sv = newSV(0);
