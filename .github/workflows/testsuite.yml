@@ -55,25 +55,15 @@ jobs:
           LF="$(perl -MConfig -e 'print $Config{lddlflags}') -fsanitize=address"
           perl -I$(pwd) Makefile.PL CCFLAGS="$CF" LDDLFLAGS="$LF"
           make
+      # The t/cve-*.t tests Load() the CPANSec trigger inputs in-process, so a
+      # plain `make test` under ASan aborts (halt_on_error) on any unpatched
+      # memory-safety defect and fails the job. No trigger logic lives here.
       - name: Run test suite under AddressSanitizer
         run: |
           ASAN_LIB=$(gcc -print-file-name=libasan.so)
           ASAN_OPTIONS="detect_leaks=0:verify_asan_link_order=0:halt_on_error=1" \
             LD_PRELOAD="$ASAN_LIB" \
             make test
-      - name: Exercise CPANSec CVE triggers under AddressSanitizer
-        if: always()
-        run: |
-          ASAN_LIB=$(gcc -print-file-name=libasan.so)
-          inputs=('- &a&V\n&a' '|\n---\n' '[&a\x01\n&a' '--- !!binary \x80\x80\x80\x80')
-          rc=0
-          for input in "${inputs[@]}"; do
-            echo "=== YAML::Syck::Load(\"$input\") ==="
-            ASAN_OPTIONS="detect_leaks=0:verify_asan_link_order=0:halt_on_error=1" \
-              LD_PRELOAD="$ASAN_LIB" \
-              perl -Mblib -MYAML::Syck -e "YAML::Syck::Load(\"$input\")" || rc=1
-          done
-          exit $rc
 
   disttest:
     env:
