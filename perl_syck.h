@@ -909,6 +909,15 @@ static SV * LoadYAML (char *s) {
 
     ENTER; SAVETMPS;
 
+    /* Skip UTF-8 BOM (EF BB BF) if present at the start of input.
+     * Many editors on Windows add a BOM; the YAML spec says it should
+     * be treated as an encoding signature, not as content. */
+    if ((unsigned char)s[0] == 0xEF &&
+        (unsigned char)s[1] == 0xBB &&
+        (unsigned char)s[2] == 0xBF) {
+        s += 3;
+    }
+
     /* Don't even bother if the string is empty. */
     if (*s == '\0') { FREETMPS; LEAVE; return &PL_sv_undef; }
 
