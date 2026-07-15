@@ -699,8 +699,8 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
 
     /* quote strings which default to implicits so they roundtrip correctly
      * when ImplicitTyping is enabled.  Besides bool and null, this covers
-     * hex (0x1A), octal (010), base-60 (1:30), and special float values
-     * (.inf, .nan) which all transform on load. */
+     * hex (0x1A), octal (010), base-60 (1:30), special float values
+     * (.inf, .nan), and the merge key (<<) which all transform on load. */
     if (
             (
                 (strncmp( implicit, "bool", 4 ) == 0) ||
@@ -709,7 +709,8 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
                 (strcmp( implicit, "float#inf" ) == 0) ||
                 (strcmp( implicit, "float#neginf" ) == 0) ||
                 (strcmp( implicit, "float#nan" ) == 0) ||
-                (strcmp( implicit, "float#base60" ) == 0)
+                (strcmp( implicit, "float#base60" ) == 0) ||
+                (strcmp( implicit, "merge" ) == 0)
             )
             &&
             (force_style != scalar_plain)
