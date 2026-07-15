@@ -21,7 +21,7 @@
 #  define PACKAGE_NAME  "JSON::Syck"
 #  define NULL_LITERAL  "null"
 #  define NULL_LITERAL_LENGTH 4
-#  define SCALAR_NUMBER scalar_none
+#  define SCALAR_NUMBER scalar_plain
 #  define PERL_SYCK_EMITTER_MARK_NODE_FLAGS EMITTER_MARK_NODE_FLAG_PERMIT_DUPLICATE_NODES
 int json_max_depth = 512;
 char json_quote_char = '"';
@@ -46,7 +46,7 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define REF_LITERAL_LENGTH 1
 #  define NULL_LITERAL  "~"
 #  define NULL_LITERAL_LENGTH 1
-#  define SCALAR_NUMBER scalar_none
+#  define SCALAR_NUMBER scalar_plain
 #  define PERL_SYCK_EMITTER_MARK_NODE_FLAGS 0
 static enum scalar_style yaml_quote_style = scalar_none;
 #  define SCALAR_STRING yaml_quote_style

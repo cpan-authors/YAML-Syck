@@ -698,18 +698,17 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     implicit = syck_match_implicit( str, len );
 
     /* quote strings which default to implicits so they roundtrip correctly
-     * when ImplicitTyping is enabled.  Besides bool and null, this covers
-     * hex (0x1A), octal (010), base-60 (1:30), and special float values
-     * (.inf, .nan) which all transform on load. */
+     * when ImplicitTyping is enabled.  Covers bool, null, all int variants
+     * (plain, hex 0x1A, octal 010, base-60 1:30, comma-grouped 1,000),
+     * and all float variants (.inf, .nan, base-60, comma-grouped 1,000.5,
+     * fixed-point, exponential).  SCALAR_NUMBER uses scalar_plain so
+     * legitimate numbers bypass this check via the force_style gate. */
     if (
             (
                 (strncmp( implicit, "bool", 4 ) == 0) ||
                 (strncmp( implicit, "null", 4 ) == 0) ||
-                (strncmp( implicit, "int#", 4 ) == 0) ||
-                (strcmp( implicit, "float#inf" ) == 0) ||
-                (strcmp( implicit, "float#neginf" ) == 0) ||
-                (strcmp( implicit, "float#nan" ) == 0) ||
-                (strcmp( implicit, "float#base60" ) == 0)
+                (strncmp( implicit, "int", 3 ) == 0) ||
+                (strncmp( implicit, "float", 5 ) == 0)
             )
             &&
             (force_style != scalar_plain)
